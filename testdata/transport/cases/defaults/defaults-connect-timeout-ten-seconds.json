@@ -1,0 +1,134 @@
+{
+  "caseId": "defaults-connect-timeout-ten-seconds",
+  "category": "defaults",
+  "description": "The default connect timeout expires at exactly 10000 ms without commitment.",
+  "input": {
+    "profile": "valid"
+  },
+  "options": {
+    "maxAttempts": 1,
+    "idempotencyKey": "idem_connect_timeout"
+  },
+  "script": [
+    {
+      "actor": "fixture",
+      "action": "hold",
+      "attempt": 1,
+      "phase": "beforeRequestBytes",
+      "barrier": "connect"
+    },
+    {
+      "actor": "runner",
+      "action": "advanceTime",
+      "byMs": 10000
+    },
+    {
+      "actor": "runner",
+      "action": "drainRuntimeDiagnostics"
+    }
+  ],
+  "expected": {
+    "configurationTrace": [
+      "credential:REPOST_SEND_API_KEY",
+      "base-url:default",
+      "endpoint-path:/v1/messages",
+      "redirects:false",
+      "snapshot:1"
+    ],
+    "attemptTrace": [
+      "attempt:1:start@0",
+      "attempt:1:end:connect-timeout@10000"
+    ],
+    "commitTrace": [
+      "attempt:1:NOT_SENT@0"
+    ],
+    "scheduleTrace": [],
+    "sideEffectTrace": [
+      "permit.acquire",
+      "configuration.snapshot",
+      "credentials.snapshot",
+      "defaults.snapshot",
+      "idempotency.generate:0",
+      "serialize:1",
+      "network:1",
+      "permit.release"
+    ],
+    "errorTrace": [
+      "terminal:CONNECT:NOT_SENT"
+    ],
+    "error": {
+      "code": "CONNECT",
+      "delivery": "NOT_SENT",
+      "attemptCount": 1,
+      "httpStatus": null,
+      "retryable": true,
+      "compressedBytes": 0,
+      "decompressedBytes": 0,
+      "truncated": false,
+      "idempotencyKey": "idem_connect_timeout",
+      "message": "Connection failed",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": "op-0001",
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [],
+      "configurationIssues": [],
+      "issueCount": 0,
+      "issuesTruncated": false,
+      "failureReason": "UNKNOWN",
+      "remediationKey": "network.unknown",
+      "causeCategory": "HTTP_RUNTIME"
+    },
+    "delivery": "NOT_SENT",
+    "byteTrace": [],
+    "redactionTrace": [],
+    "fixtureTrace": [
+      "fixture:attempt:1:accepted"
+    ],
+    "result": null,
+    "legacyBody": {
+      "code": "CONNECT",
+      "message": "Connection failed",
+      "truncated": false
+    },
+    "outcomeEvidence": {
+      "operationId": "op-0001",
+      "primaryKind": "structured-error",
+      "nativeCancelled": false,
+      "settlements": 1,
+      "code": "CONNECT",
+      "delivery": "NOT_SENT",
+      "attemptCount": 1,
+      "httpStatus": null,
+      "idempotencyKey": "idem_connect_timeout",
+      "noGhostWork": true,
+      "failureReason": "UNKNOWN",
+      "remediationKey": "network.unknown",
+      "causeCategory": "HTTP_RUNTIME"
+    },
+    "primarySurface": "sendOperation",
+    "runtimeDiagnostics": {
+      "inFlightOperations": 0,
+      "bufferedBytes": 0,
+      "concurrencyOverloadRejections": 0,
+      "requestByteOverloadRejections": 0,
+      "responseByteOverloadRejections": 0,
+      "responseHeaderLimitFailures": 0,
+      "executorOverloadRejections": 0,
+      "schedulerOverloadRejections": 0,
+      "responseCloseFailures": 0,
+      "droppedObserverEvents": 0,
+      "observerFailures": 0,
+      "closed": false
+    },
+    "completionRoute": "OPERATION_EXECUTION",
+    "observerCallbackTrace": [],
+    "observerEmissionTrace": [
+      "operation.start|operationId=op-0001",
+      "attempt.start|operationId=op-0001|attempt=1",
+      "attempt.end|operationId=op-0001|attempt=1|durationMs=10000|outcome=connect-timeout|code=CONNECT|failureReason=UNKNOWN|delivery=NOT_SENT|statusClass=none",
+      "operation.end|operationId=op-0001|durationMs=10000|outcome=failed|code=CONNECT|failureReason=UNKNOWN|delivery=NOT_SENT|attempts=1"
+    ]
+  }
+}

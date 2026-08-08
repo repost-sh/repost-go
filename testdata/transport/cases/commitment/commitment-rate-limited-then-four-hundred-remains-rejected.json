@@ -1,0 +1,186 @@
+{
+  "caseId": "commitment-rate-limited-then-four-hundred-remains-rejected",
+  "category": "commitment",
+  "description": "HTTP 429 definitively rejects its current attempt and does not create uncertainty; a later definitive 400 therefore leaves the operation REJECTED.",
+  "input": {
+    "profile": "valid",
+    "entropy": [
+      0
+    ]
+  },
+  "options": {
+    "maxAttempts": 2,
+    "idempotencyKey": "idem_rate_limited_then_four_hundred"
+  },
+  "script": [
+    {
+      "actor": "fixture",
+      "action": "respond",
+      "attempt": 1,
+      "status": 429,
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": {
+        "kind": "base64",
+        "data": "eyJlcnJvciI6eyJjb2RlIjoicmVtb3RlIiwicmVxdWVzdElkIjoicmVxXzEifX0="
+      }
+    },
+    {
+      "actor": "fixture",
+      "action": "respond",
+      "attempt": 2,
+      "status": 400,
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": {
+        "asset": "remoteError"
+      }
+    },
+    {
+      "actor": "runner",
+      "action": "drainRuntimeDiagnostics"
+    }
+  ],
+  "expected": {
+    "configurationTrace": [
+      "credential:REPOST_SEND_API_KEY",
+      "base-url:default",
+      "endpoint-path:/v1/messages",
+      "redirects:false",
+      "snapshot:1"
+    ],
+    "attemptTrace": [
+      "attempt:1:start@0",
+      "attempt:1:commit@0",
+      "attempt:1:response:429@0",
+      "attempt:1:end:rate-limited@0",
+      "attempt:2:start@0",
+      "attempt:2:commit@0",
+      "attempt:2:response:400@0",
+      "attempt:2:end:http-rejected@0"
+    ],
+    "commitTrace": [
+      "attempt:1:NOT_SENT@0",
+      "attempt:1:POSSIBLY_SENT@0",
+      "operation:POSSIBLY_SENT@0",
+      "attempt:2:NOT_SENT@0",
+      "attempt:2:POSSIBLY_SENT@0"
+    ],
+    "scheduleTrace": [
+      "retry:1:cap=250@0",
+      "retry:1:bound=251@0",
+      "retry:1:entropy=0@0",
+      "retry:1:delay=0@0"
+    ],
+    "sideEffectTrace": [
+      "permit.acquire",
+      "configuration.snapshot",
+      "credentials.snapshot",
+      "defaults.snapshot",
+      "idempotency.generate:0",
+      "serialize:1",
+      "network:2",
+      "permit.release"
+    ],
+    "errorTrace": [
+      "terminal:HTTP_REJECTED:REJECTED"
+    ],
+    "error": {
+      "code": "HTTP_REJECTED",
+      "delivery": "REJECTED",
+      "attemptCount": 2,
+      "httpStatus": 400,
+      "retryable": false,
+      "compressedBytes": 90,
+      "decompressedBytes": 90,
+      "truncated": false,
+      "idempotencyKey": "idem_rate_limited_then_four_hundred",
+      "message": "Request was rejected",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": "op-0001",
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null,
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [],
+      "configurationIssues": [],
+      "issueCount": 0,
+      "issuesTruncated": false
+    },
+    "legacyBody": {
+      "code": "HTTP_REJECTED",
+      "message": "Request was rejected",
+      "truncated": false
+    },
+    "delivery": "REJECTED",
+    "byteTrace": [
+      "response-wire:47:accepted",
+      "response-decoded:47:accepted",
+      "error-discarded:47:accepted",
+      "response-wire:90:accepted",
+      "response-decoded:90:accepted",
+      "error-discarded:90:accepted"
+    ],
+    "redactionTrace": [
+      "scan:render:clean",
+      "scan:logs:clean",
+      "scan:observer:clean",
+      "scan:metric-tags:clean",
+      "scan:spans:clean"
+    ],
+    "fixtureTrace": [
+      "fixture:attempt:1:accepted",
+      "fixture:attempt:1:idempotency:idem_rate_limited_then_four_hundred",
+      "fixture:attempt:1:response-bytes:47",
+      "fixture:attempt:2:accepted",
+      "fixture:attempt:2:idempotency:idem_rate_limited_then_four_hundred",
+      "fixture:attempt:2:response-bytes:90"
+    ],
+    "result": null,
+    "observerCallbackTrace": [],
+    "primarySurface": "sendOperation",
+    "completionRoute": "OPERATION_EXECUTION",
+    "runtimeDiagnostics": {
+      "inFlightOperations": 0,
+      "bufferedBytes": 0,
+      "concurrencyOverloadRejections": 0,
+      "requestByteOverloadRejections": 0,
+      "responseByteOverloadRejections": 0,
+      "responseHeaderLimitFailures": 0,
+      "executorOverloadRejections": 0,
+      "schedulerOverloadRejections": 0,
+      "responseCloseFailures": 0,
+      "droppedObserverEvents": 0,
+      "observerFailures": 0,
+      "closed": false
+    },
+    "outcomeEvidence": {
+      "operationId": "op-0001",
+      "primaryKind": "structured-error",
+      "nativeCancelled": false,
+      "settlements": 1,
+      "code": "HTTP_REJECTED",
+      "delivery": "REJECTED",
+      "attemptCount": 2,
+      "httpStatus": 400,
+      "idempotencyKey": "idem_rate_limited_then_four_hundred",
+      "noGhostWork": true,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "observerEmissionTrace": [
+      "operation.start|operationId=op-0001",
+      "attempt.start|operationId=op-0001|attempt=1",
+      "attempt.end|operationId=op-0001|attempt=1|durationMs=0|outcome=rate-limited|code=RATE_LIMITED|failureReason=NONE|delivery=REJECTED|statusClass=4xx",
+      "retry.delay|operationId=op-0001|attempt=2|delayMs=0",
+      "attempt.start|operationId=op-0001|attempt=2",
+      "attempt.end|operationId=op-0001|attempt=2|durationMs=0|outcome=http-rejected|code=HTTP_REJECTED|failureReason=NONE|delivery=REJECTED|statusClass=4xx",
+      "operation.end|operationId=op-0001|durationMs=0|outcome=rejected|code=HTTP_REJECTED|failureReason=NONE|delivery=REJECTED|attempts=2"
+    ]
+  }
+}

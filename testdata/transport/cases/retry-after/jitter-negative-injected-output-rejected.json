@@ -1,0 +1,149 @@
+{
+  "caseId": "jitter-negative-injected-output-rejected",
+  "category": "retry-after",
+  "description": "A negative integer returned by injected RetryEntropy terminates after the retryable committed first attempt and before attempt two.",
+  "input": {
+    "profile": "valid",
+    "entropy": [
+      -1
+    ]
+  },
+  "options": {
+    "maxAttempts": 2,
+    "idempotencyKey": "idem_jitter_entropy_negative"
+  },
+  "script": [
+    {
+      "actor": "fixture",
+      "action": "failConnection",
+      "attempt": 1,
+      "phase": "afterRequestBytes",
+      "kind": "io"
+    },
+    {
+      "actor": "runner",
+      "action": "drainRuntimeDiagnostics"
+    }
+  ],
+  "expected": {
+    "configurationTrace": [
+      "credential:REPOST_SEND_API_KEY",
+      "base-url:default",
+      "endpoint-path:/v1/messages",
+      "redirects:false",
+      "snapshot:1"
+    ],
+    "attemptTrace": [
+      "attempt:1:start@0",
+      "attempt:1:commit@0",
+      "attempt:1:end:io@0"
+    ],
+    "commitTrace": [
+      "attempt:1:NOT_SENT@0",
+      "attempt:1:POSSIBLY_SENT@0",
+      "operation:POSSIBLY_SENT@0"
+    ],
+    "scheduleTrace": [
+      "retry:1:cap=250@0",
+      "retry:1:bound=251@0",
+      "retry:1:entropy=-1@0"
+    ],
+    "sideEffectTrace": [
+      "permit.acquire",
+      "configuration.snapshot",
+      "credentials.snapshot",
+      "defaults.snapshot",
+      "idempotency.generate:0",
+      "serialize:1",
+      "network:1",
+      "permit.release"
+    ],
+    "errorTrace": [
+      "terminal:CONFIGURATION:POSSIBLY_SENT"
+    ],
+    "error": {
+      "code": "CONFIGURATION",
+      "delivery": "POSSIBLY_SENT",
+      "attemptCount": 1,
+      "httpStatus": null,
+      "retryable": false,
+      "compressedBytes": 0,
+      "decompressedBytes": 0,
+      "truncated": false,
+      "idempotencyKey": "idem_jitter_entropy_negative",
+      "message": "Invalid transport configuration",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": "op-0001",
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [],
+      "configurationIssues": [
+        {
+          "code": "INVALID_VALUE",
+          "optionKeys": [
+            "RETRY_ENTROPY"
+          ]
+        }
+      ],
+      "issueCount": 1,
+      "issuesTruncated": false,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "delivery": "POSSIBLY_SENT",
+    "byteTrace": [],
+    "redactionTrace": [],
+    "fixtureTrace": [
+      "fixture:attempt:1:accepted",
+      "fixture:attempt:1:idempotency:idem_jitter_entropy_negative",
+      "fixture:attempt:1:request-bytes:1",
+      "fixture:attempt:1:failure:io"
+    ],
+    "result": null,
+    "legacyBody": {
+      "code": "CONFIGURATION",
+      "message": "Invalid transport configuration",
+      "truncated": false
+    },
+    "outcomeEvidence": {
+      "operationId": "op-0001",
+      "primaryKind": "structured-error",
+      "nativeCancelled": false,
+      "settlements": 1,
+      "code": "CONFIGURATION",
+      "delivery": "POSSIBLY_SENT",
+      "attemptCount": 1,
+      "httpStatus": null,
+      "idempotencyKey": "idem_jitter_entropy_negative",
+      "noGhostWork": true,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "primarySurface": "sendOperation",
+    "runtimeDiagnostics": {
+      "inFlightOperations": 0,
+      "bufferedBytes": 0,
+      "concurrencyOverloadRejections": 0,
+      "requestByteOverloadRejections": 0,
+      "responseByteOverloadRejections": 0,
+      "responseHeaderLimitFailures": 0,
+      "executorOverloadRejections": 0,
+      "schedulerOverloadRejections": 0,
+      "responseCloseFailures": 0,
+      "droppedObserverEvents": 0,
+      "observerFailures": 0,
+      "closed": false
+    },
+    "completionRoute": "OPERATION_EXECUTION",
+    "observerCallbackTrace": [],
+    "observerEmissionTrace": [
+      "operation.start|operationId=op-0001",
+      "attempt.start|operationId=op-0001|attempt=1",
+      "attempt.end|operationId=op-0001|attempt=1|durationMs=0|outcome=io|code=IO|failureReason=UNKNOWN|delivery=POSSIBLY_SENT|statusClass=none",
+      "operation.end|operationId=op-0001|durationMs=0|outcome=failed|code=CONFIGURATION|failureReason=NONE|delivery=POSSIBLY_SENT|attempts=1"
+    ]
+  }
+}

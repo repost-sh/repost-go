@@ -1,0 +1,122 @@
+{
+  "caseId": "response-request-streaming-substantially-over-limit-bounded",
+  "category": "response",
+  "description": "A virtual 16 MiB serializer output aborts at exactly cap+1 without retaining the full oversized request or reaching the network.",
+  "input": {
+    "profile": "valid",
+    "send": {
+      "payload": {
+        "$bytes": {
+          "serializedRequestBytes": 16777216
+        }
+      }
+    }
+  },
+  "options": {
+    "idempotencyKey": "idem_streaming_request_limit"
+  },
+  "script": [
+    {
+      "actor": "runner",
+      "action": "drainRuntimeDiagnostics"
+    }
+  ],
+  "expected": {
+    "configurationTrace": [
+      "credential:REPOST_SEND_API_KEY",
+      "base-url:default",
+      "endpoint-path:/v1/messages",
+      "redirects:false",
+      "snapshot:1"
+    ],
+    "attemptTrace": [],
+    "commitTrace": [],
+    "scheduleTrace": [],
+    "sideEffectTrace": [
+      "permit.acquire",
+      "configuration.snapshot",
+      "credentials.snapshot",
+      "defaults.snapshot",
+      "idempotency.generate:0",
+      "serialize:1",
+      "permit.release"
+    ],
+    "errorTrace": [
+      "terminal:REQUEST_TOO_LARGE:NOT_SENT"
+    ],
+    "error": {
+      "code": "REQUEST_TOO_LARGE",
+      "delivery": "NOT_SENT",
+      "attemptCount": 0,
+      "httpStatus": null,
+      "retryable": false,
+      "compressedBytes": 0,
+      "decompressedBytes": 0,
+      "truncated": false,
+      "idempotencyKey": "idem_streaming_request_limit",
+      "message": "Request exceeds the size limit",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": "op-0001",
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [],
+      "configurationIssues": [],
+      "issueCount": 0,
+      "issuesTruncated": false,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "delivery": "NOT_SENT",
+    "byteTrace": [
+      "request:1048577:rejected"
+    ],
+    "redactionTrace": [],
+    "fixtureTrace": [
+      "fixture:serialization-buffer-peak:1048577"
+    ],
+    "result": null,
+    "legacyBody": {
+      "code": "REQUEST_TOO_LARGE",
+      "message": "Request exceeds the size limit",
+      "truncated": false
+    },
+    "outcomeEvidence": {
+      "operationId": "op-0001",
+      "primaryKind": "structured-error",
+      "nativeCancelled": false,
+      "settlements": 1,
+      "code": "REQUEST_TOO_LARGE",
+      "delivery": "NOT_SENT",
+      "attemptCount": 0,
+      "httpStatus": null,
+      "idempotencyKey": "idem_streaming_request_limit",
+      "noGhostWork": true,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "primarySurface": "sendOperation",
+    "runtimeDiagnostics": {
+      "inFlightOperations": 0,
+      "bufferedBytes": 0,
+      "concurrencyOverloadRejections": 0,
+      "requestByteOverloadRejections": 0,
+      "responseByteOverloadRejections": 0,
+      "responseHeaderLimitFailures": 0,
+      "executorOverloadRejections": 0,
+      "schedulerOverloadRejections": 0,
+      "responseCloseFailures": 0,
+      "droppedObserverEvents": 0,
+      "observerFailures": 0,
+      "closed": false
+    },
+    "completionRoute": "OPERATION_EXECUTION",
+    "observerCallbackTrace": [],
+    "observerEmissionTrace": [
+      "operation.start|operationId=op-0001",
+      "operation.end|operationId=op-0001|durationMs=0|outcome=failed|code=REQUEST_TOO_LARGE|failureReason=NONE|delivery=NOT_SENT|attempts=0"
+    ]
+  }
+}

@@ -1,0 +1,240 @@
+{
+  "scenarioId": "concurrency-protocol-failure-release-and-probe",
+  "description": "Two deterministic malformed HTTP 200 responses exhaust maxAttempts as RESPONSE_PROTOCOL/POSSIBLY_SENT, release before terminal settlement, and permit a later successful send on the same runtime.",
+  "runtime": {
+    "maxInFlight": 1,
+    "maxBufferedBytes": 33554432
+  },
+  "operations": [
+    {
+      "operationId": "op-protocol-failure",
+      "input": {
+        "profile": "valid",
+        "entropy": [
+          0
+        ]
+      },
+      "options": {
+        "idempotencyKey": "idem_protocol_failure",
+        "maxAttempts": 2
+      },
+      "fixtureScript": [
+        {
+          "action": "respond",
+          "attempt": 1,
+          "status": 200,
+          "bodyKind": "malformed",
+          "responseBytes": 16
+        },
+        {
+          "action": "respond",
+          "attempt": 2,
+          "status": 200,
+          "bodyKind": "malformed",
+          "responseBytes": 16
+        }
+      ],
+      "requestBytes": 104
+    },
+    {
+      "operationId": "op-protocol-probe",
+      "input": {
+        "profile": "valid"
+      },
+      "options": {
+        "idempotencyKey": "idem_protocol_probe"
+      },
+      "fixtureScript": [
+        {
+          "action": "respond",
+          "attempt": 1,
+          "status": 202,
+          "bodyKind": "valid",
+          "responseBytes": 104
+        }
+      ],
+      "requestBytes": 104
+    }
+  ],
+  "steps": [
+    {
+      "action": "start",
+      "operationId": "op-protocol-failure"
+    },
+    {
+      "action": "awaitRetryScheduled",
+      "operationId": "op-protocol-failure",
+      "retryIndex": 1
+    },
+    {
+      "action": "advanceTime",
+      "byMs": 0
+    },
+    {
+      "action": "awaitTerminal",
+      "operationId": "op-protocol-failure"
+    },
+    {
+      "action": "start",
+      "operationId": "op-protocol-probe"
+    },
+    {
+      "action": "awaitTerminal",
+      "operationId": "op-protocol-probe"
+    },
+    {
+      "action": "checkpoint",
+      "name": "protocol-probed"
+    }
+  ],
+  "expected": {
+    "orderedTrace": [
+      "operation:op-protocol-failure:permit.acquire:inFlight=1",
+      "operation:op-protocol-failure:reservation.acquire:reserved=1",
+      "operation:op-protocol-failure:observer.start",
+      "operation:op-protocol-failure:retry.schedule:index=1:delayMs=0:inFlight=1",
+      "operation:op-protocol-failure:permit.release:inFlight=0",
+      "operation:op-protocol-failure:primary.complete:RESPONSE_PROTOCOL:POSSIBLY_SENT",
+      "operation:op-protocol-failure:outcome.complete:RESPONSE_PROTOCOL:POSSIBLY_SENT",
+      "operation:op-protocol-failure:reservation.release:reserved=0",
+      "operation:op-protocol-failure:terminal:RESPONSE_PROTOCOL:POSSIBLY_SENT:attempts=2",
+      "operation:op-protocol-probe:permit.acquire:inFlight=1",
+      "operation:op-protocol-probe:reservation.acquire:reserved=1",
+      "operation:op-protocol-probe:observer.start",
+      "operation:op-protocol-probe:permit.release:inFlight=0",
+      "operation:op-protocol-probe:primary.complete:OK:ACCEPTED",
+      "operation:op-protocol-probe:outcome.complete:OK:ACCEPTED",
+      "operation:op-protocol-probe:reservation.release:reserved=0",
+      "operation:op-protocol-probe:terminal:OK:ACCEPTED:attempts=1",
+      "checkpoint:protocol-probed:state=OPEN:inFlight=0:queuedWaiters=0"
+    ],
+    "checkpoints": [
+      {
+        "name": "protocol-probed",
+        "state": "OPEN",
+        "inFlight": 0,
+        "completionReservations": 0,
+        "activeTerminalOperation": null,
+        "queuedTerminalTasks": 0,
+        "currentBufferedBytes": 0,
+        "queuedWaiters": 0,
+        "totalPermitAcquires": 2,
+        "totalPermitRejects": 0,
+        "totalPermitReleases": 2,
+        "totalByteAcquires": 6,
+        "totalByteRejects": 0,
+        "totalByteReleases": 6,
+        "deadlineCallbacks": 0,
+        "terminalDispatches": 0,
+        "ghostWorkAttempts": 0,
+        "diagnostics": {
+          "inFlightOperations": 0,
+          "bufferedBytes": 0,
+          "concurrencyOverloadRejections": 0,
+          "requestByteOverloadRejections": 0,
+          "responseByteOverloadRejections": 0,
+          "responseHeaderLimitFailures": 0,
+          "executorOverloadRejections": 0,
+          "schedulerOverloadRejections": 0,
+          "responseCloseFailures": 0,
+          "droppedObserverEvents": 0,
+          "observerFailures": 0,
+          "closed": false
+        }
+      }
+    ],
+    "operations": [
+      {
+        "operationId": "op-protocol-failure",
+        "code": "RESPONSE_PROTOCOL",
+        "delivery": "POSSIBLY_SENT",
+        "attemptCount": 2,
+        "completionRoute": "OPERATION_EXECUTION",
+        "sideEffects": {
+          "permitAcquires": 1,
+          "permitRejects": 0,
+          "permitReleases": 1,
+          "observerStarts": 1,
+          "configurationSnapshots": 1,
+          "credentialResolutions": 1,
+          "defaultSnapshots": 1,
+          "idempotencyGenerations": 0,
+          "serializations": 1,
+          "networkAttempts": 2,
+          "byteAcquires": 3,
+          "byteRejects": 0,
+          "byteReleases": 3,
+          "deadlineCallbacks": 0,
+          "terminalDispatches": 0,
+          "ghostWorkAttempts": 0,
+          "reservationAcquires": 1,
+          "reservationReleases": 1
+        }
+      },
+      {
+        "operationId": "op-protocol-probe",
+        "code": "OK",
+        "delivery": "ACCEPTED",
+        "attemptCount": 1,
+        "completionRoute": "OPERATION_EXECUTION",
+        "sideEffects": {
+          "permitAcquires": 1,
+          "permitRejects": 0,
+          "permitReleases": 1,
+          "observerStarts": 1,
+          "configurationSnapshots": 1,
+          "credentialResolutions": 1,
+          "defaultSnapshots": 1,
+          "idempotencyGenerations": 0,
+          "serializations": 1,
+          "networkAttempts": 1,
+          "byteAcquires": 3,
+          "byteRejects": 0,
+          "byteReleases": 3,
+          "deadlineCallbacks": 0,
+          "terminalDispatches": 0,
+          "ghostWorkAttempts": 0,
+          "reservationAcquires": 1,
+          "reservationReleases": 1
+        }
+      }
+    ],
+    "finalRuntime": {
+      "state": "OPEN",
+      "inFlight": 0,
+      "maxObservedInFlight": 1,
+      "completionReservations": 0,
+      "maxObservedCompletionReservations": 1,
+      "activeTerminalOperation": null,
+      "queuedTerminalTasks": 0,
+      "currentBufferedBytes": 0,
+      "maxObservedBufferedBytes": 2359296,
+      "queuedWaiters": 0,
+      "totalPermitAcquires": 2,
+      "totalPermitRejects": 0,
+      "totalPermitReleases": 2,
+      "totalReservationAcquires": 2,
+      "totalReservationReleases": 2,
+      "totalByteAcquires": 6,
+      "totalByteRejects": 0,
+      "totalByteReleases": 6,
+      "deadlineCallbacks": 0,
+      "terminalDispatches": 0,
+      "ghostWorkAttempts": 0,
+      "diagnostics": {
+        "inFlightOperations": 0,
+        "bufferedBytes": 0,
+        "concurrencyOverloadRejections": 0,
+        "requestByteOverloadRejections": 0,
+        "responseByteOverloadRejections": 0,
+        "responseHeaderLimitFailures": 0,
+        "executorOverloadRejections": 0,
+        "schedulerOverloadRejections": 0,
+        "responseCloseFailures": 0,
+        "droppedObserverEvents": 0,
+        "observerFailures": 0,
+        "closed": false
+      }
+    }
+  }
+}

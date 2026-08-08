@@ -1,0 +1,172 @@
+{
+  "caseId": "commitment-rate-limited-then-dns-remains-not-sent",
+  "category": "commitment",
+  "description": "A definitive 429 rejection resolves the first attempt, so a later precommit DNS failure remains precisely NOT_SENT rather than inheriting stale uncertainty.",
+  "input": {
+    "profile": "valid",
+    "entropy": [
+      0
+    ]
+  },
+  "options": {
+    "maxAttempts": 2,
+    "idempotencyKey": "idem_commitment_rate_limited_then_dns_remains_not_sent"
+  },
+  "script": [
+    {
+      "actor": "fixture",
+      "action": "respond",
+      "attempt": 1,
+      "status": 429,
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": {
+        "asset": "remoteError"
+      }
+    },
+    {
+      "actor": "fixture",
+      "action": "failConnection",
+      "attempt": 2,
+      "phase": "beforeRequestBytes",
+      "kind": "dns"
+    },
+    {
+      "actor": "runner",
+      "action": "drainRuntimeDiagnostics"
+    }
+  ],
+  "expected": {
+    "configurationTrace": [
+      "credential:REPOST_SEND_API_KEY",
+      "base-url:default",
+      "endpoint-path:/v1/messages",
+      "redirects:false",
+      "snapshot:1"
+    ],
+    "attemptTrace": [
+      "attempt:1:start@0",
+      "attempt:1:commit@0",
+      "attempt:1:response:429@0",
+      "attempt:1:end:rate-limited@0",
+      "attempt:2:start@0",
+      "attempt:2:end:dns@0"
+    ],
+    "commitTrace": [
+      "attempt:1:NOT_SENT@0",
+      "attempt:1:POSSIBLY_SENT@0",
+      "operation:POSSIBLY_SENT@0",
+      "attempt:2:NOT_SENT@0"
+    ],
+    "scheduleTrace": [
+      "retry:1:cap=250@0",
+      "retry:1:bound=251@0",
+      "retry:1:entropy=0@0",
+      "retry:1:delay=0@0"
+    ],
+    "sideEffectTrace": [
+      "permit.acquire",
+      "configuration.snapshot",
+      "credentials.snapshot",
+      "defaults.snapshot",
+      "idempotency.generate:0",
+      "serialize:1",
+      "network:2",
+      "permit.release"
+    ],
+    "errorTrace": [
+      "terminal:DNS:NOT_SENT"
+    ],
+    "error": {
+      "code": "DNS",
+      "delivery": "NOT_SENT",
+      "attemptCount": 2,
+      "httpStatus": null,
+      "retryable": true,
+      "compressedBytes": 0,
+      "decompressedBytes": 0,
+      "truncated": false,
+      "idempotencyKey": "idem_commitment_rate_limited_then_dns_remains_not_sent",
+      "message": "DNS resolution failed",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": "op-0001",
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [],
+      "configurationIssues": [],
+      "issueCount": 0,
+      "issuesTruncated": false,
+      "failureReason": "UNKNOWN",
+      "remediationKey": "network.unknown",
+      "causeCategory": "HTTP_RUNTIME"
+    },
+    "delivery": "NOT_SENT",
+    "byteTrace": [
+      "response-wire:90:accepted",
+      "response-decoded:90:accepted",
+      "error-discarded:90:accepted"
+    ],
+    "redactionTrace": [
+      "scan:render:clean",
+      "scan:logs:clean",
+      "scan:observer:clean",
+      "scan:metric-tags:clean",
+      "scan:spans:clean"
+    ],
+    "fixtureTrace": [
+      "fixture:attempt:1:accepted",
+      "fixture:attempt:1:idempotency:idem_commitment_rate_limited_then_dns_remains_not_sent",
+      "fixture:attempt:1:response-bytes:90",
+      "fixture:attempt:2:failure:dns"
+    ],
+    "result": null,
+    "legacyBody": {
+      "code": "DNS",
+      "message": "DNS resolution failed",
+      "truncated": false
+    },
+    "outcomeEvidence": {
+      "operationId": "op-0001",
+      "primaryKind": "structured-error",
+      "nativeCancelled": false,
+      "settlements": 1,
+      "code": "DNS",
+      "delivery": "NOT_SENT",
+      "attemptCount": 2,
+      "httpStatus": 429,
+      "idempotencyKey": "idem_commitment_rate_limited_then_dns_remains_not_sent",
+      "noGhostWork": true,
+      "failureReason": "UNKNOWN",
+      "remediationKey": "network.unknown",
+      "causeCategory": "HTTP_RUNTIME"
+    },
+    "primarySurface": "sendOperation",
+    "runtimeDiagnostics": {
+      "inFlightOperations": 0,
+      "bufferedBytes": 0,
+      "concurrencyOverloadRejections": 0,
+      "requestByteOverloadRejections": 0,
+      "responseByteOverloadRejections": 0,
+      "responseHeaderLimitFailures": 0,
+      "executorOverloadRejections": 0,
+      "schedulerOverloadRejections": 0,
+      "responseCloseFailures": 0,
+      "droppedObserverEvents": 0,
+      "observerFailures": 0,
+      "closed": false
+    },
+    "completionRoute": "OPERATION_EXECUTION",
+    "observerCallbackTrace": [],
+    "observerEmissionTrace": [
+      "operation.start|operationId=op-0001",
+      "attempt.start|operationId=op-0001|attempt=1",
+      "attempt.end|operationId=op-0001|attempt=1|durationMs=0|outcome=rate-limited|code=RATE_LIMITED|failureReason=NONE|delivery=REJECTED|statusClass=4xx",
+      "retry.delay|operationId=op-0001|attempt=2|delayMs=0",
+      "attempt.start|operationId=op-0001|attempt=2",
+      "attempt.end|operationId=op-0001|attempt=2|durationMs=0|outcome=dns|code=DNS|failureReason=UNKNOWN|delivery=NOT_SENT|statusClass=none",
+      "operation.end|operationId=op-0001|durationMs=0|outcome=failed|code=DNS|failureReason=UNKNOWN|delivery=NOT_SENT|attempts=2"
+    ]
+  }
+}

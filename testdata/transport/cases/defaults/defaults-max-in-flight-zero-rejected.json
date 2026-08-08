@@ -1,0 +1,78 @@
+{
+  "caseId": "defaults-max-in-flight-zero-rejected",
+  "category": "defaults",
+  "description": "maxInFlight 0 is outside the inclusive 1..65536 range.",
+  "input": {
+    "profile": "valid"
+  },
+  "options": {
+    "maxInFlight": 0
+  },
+  "script": [],
+  "expected": {
+    "configurationTrace": [
+      "snapshot:0"
+    ],
+    "attemptTrace": [],
+    "commitTrace": [],
+    "scheduleTrace": [],
+    "sideEffectTrace": [],
+    "errorTrace": [
+      "terminal:CONFIGURATION:NOT_SENT"
+    ],
+    "error": {
+      "code": "CONFIGURATION",
+      "delivery": "NOT_SENT",
+      "attemptCount": 0,
+      "httpStatus": null,
+      "retryable": false,
+      "compressedBytes": 0,
+      "decompressedBytes": 0,
+      "truncated": false,
+      "idempotencyKey": null,
+      "message": "Invalid transport configuration",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": null,
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [],
+      "configurationIssues": [
+        {
+          "code": "OUT_OF_RANGE",
+          "optionKeys": [
+            "MAX_IN_FLIGHT_OPERATIONS"
+          ]
+        }
+      ],
+      "issueCount": 1,
+      "issuesTruncated": false,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "delivery": "NOT_SENT",
+    "byteTrace": [],
+    "redactionTrace": [],
+    "fixtureTrace": [],
+    "result": null,
+    "legacyBody": {
+      "code": "CONFIGURATION",
+      "message": "Invalid transport configuration",
+      "truncated": false
+    },
+    "primarySurface": "constructionThrow",
+    "completionRoute": null,
+    "observerCallbackTrace": [],
+    "constructionEvidence": {
+      "code": "CONFIGURATION",
+      "message": "Invalid transport configuration",
+      "operationId": null,
+      "idempotencyKey": null,
+      "admitted": false,
+      "settlements": 0,
+      "causeCategory": null
+    },
+    "observerEmissionTrace": []
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "caseId": "defaults-max-in-flight-two-hundred-fifty-six-saturated",
+  "category": "defaults",
+  "description": "With all default 256 permits occupied, admission fails immediately.",
+  "input": {
+    "profile": "valid"
+  },
+  "options": {
+    "occupiedPermits": 256
+  },
+  "script": [
+    {
+      "actor": "runner",
+      "action": "drainRuntimeDiagnostics"
+    }
+  ],
+  "expected": {
+    "configurationTrace": [],
+    "attemptTrace": [],
+    "commitTrace": [],
+    "scheduleTrace": [],
+    "sideEffectTrace": [
+      "permit.reject"
+    ],
+    "errorTrace": [
+      "terminal:OVERLOADED:NOT_SENT"
+    ],
+    "error": {
+      "code": "OVERLOADED",
+      "delivery": "NOT_SENT",
+      "attemptCount": 0,
+      "httpStatus": null,
+      "retryable": false,
+      "compressedBytes": 0,
+      "decompressedBytes": 0,
+      "truncated": false,
+      "idempotencyKey": null,
+      "message": "Transport is at capacity",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": "op-0001",
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [],
+      "configurationIssues": [],
+      "issueCount": 0,
+      "issuesTruncated": false,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "delivery": "NOT_SENT",
+    "byteTrace": [],
+    "redactionTrace": [],
+    "fixtureTrace": [],
+    "result": null,
+    "legacyBody": {
+      "code": "OVERLOADED",
+      "message": "Transport is at capacity",
+      "truncated": false
+    },
+    "outcomeEvidence": {
+      "operationId": "op-0001",
+      "primaryKind": "structured-error",
+      "nativeCancelled": false,
+      "settlements": 1,
+      "code": "OVERLOADED",
+      "delivery": "NOT_SENT",
+      "attemptCount": 0,
+      "httpStatus": null,
+      "idempotencyKey": null,
+      "noGhostWork": true,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "primarySurface": "sendOperation",
+    "runtimeDiagnostics": {
+      "inFlightOperations": 0,
+      "bufferedBytes": 0,
+      "concurrencyOverloadRejections": 1,
+      "requestByteOverloadRejections": 0,
+      "responseByteOverloadRejections": 0,
+      "responseHeaderLimitFailures": 0,
+      "executorOverloadRejections": 0,
+      "schedulerOverloadRejections": 0,
+      "responseCloseFailures": 0,
+      "droppedObserverEvents": 0,
+      "observerFailures": 0,
+      "closed": false
+    },
+    "completionRoute": "DIRECT_PRE_ADMISSION",
+    "observerCallbackTrace": [],
+    "observerEmissionTrace": [
+      "operation.start|operationId=op-0001",
+      "operation.end|operationId=op-0001|durationMs=0|outcome=overloaded|code=OVERLOADED|failureReason=NONE|delivery=NOT_SENT|attempts=0"
+    ]
+  }
+}

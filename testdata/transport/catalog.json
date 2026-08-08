@@ -1,0 +1,145 @@
+{
+  "bodyAssets": {
+    "validIdentity": {
+      "kind": "base64",
+      "data": "eyJpZCI6Im1zZ18xIiwidHlwZSI6ImNvbnRyYWN0LnNlbnQiLCJjdXN0b21lcklkIjoiY3VzX2NvbnRyYWN0IiwidGltZXN0YW1wIjoiMjAyNi0wMS0wMVQwMDowMDowMC4wMDBaIn0=",
+      "wireBytes": 104,
+      "decodedBytes": 104
+    },
+    "validGzip": {
+      "kind": "base64",
+      "data": "H4sIAAAAAAAAEzXLsQqAIBRG4Xf5Z42rQ4Nv0N7UImISDmZ0r0NE7x4GwRm/cyOvcCi8eQMFuY4Eh1h3OUOUgdMuUIiNpZZ0Tt3Gxv4HfcklsYRywMGSHTUZTWYmcl8DES14XpGKHJtoAAAA",
+      "wireBytes": 108,
+      "decodedBytes": 104
+    },
+    "empty": {
+      "kind": "base64",
+      "data": "",
+      "wireBytes": 0,
+      "decodedBytes": 0
+    },
+    "malformed": {
+      "kind": "base64",
+      "data": "eyJpZCI6",
+      "wireBytes": 6,
+      "decodedBytes": 6
+    },
+    "wrongType": {
+      "kind": "base64",
+      "data": "W10=",
+      "wireBytes": 2,
+      "decodedBytes": 2
+    },
+    "remoteError": {
+      "kind": "base64",
+      "data": "eyJlcnJvciI6eyJjb2RlIjoicmVtb3RlIiwibWVzc2FnZSI6IlNFTlRJTkVMX1JFTU9URV9NRVNTQUdFXzliYjMwZiIsInJlcXVlc3RJZCI6InJlcV8xIn19",
+      "wireBytes": 90,
+      "decodedBytes": 90
+    },
+    "corruptGzipTrailer": {
+      "kind": "base64",
+      "data": "H4sIAAAAAAAAEzXLsQqAIBRG4Xf5Z42rQ4Nv0N7UImISDmZ0r0NE7x4GwRm/cyOvcCi8eQMFuY4Eh1h3OUOUgdMuUIiNpZZ0Tt3Gxv4HfcklsYRywMGSHTUZTWYmcl8DES14XpGKHJtoAAP/",
+      "wireBytes": 108,
+      "decodedBytes": null
+    },
+    "concatenatedGzip": {
+      "kind": "concatenated",
+      "members": [
+        "validGzip",
+        "validGzip"
+      ],
+      "wireBytes": 216,
+      "decodedBytes": null
+    },
+    "ratioExactly100": {
+      "kind": "base64",
+      "data": "H4sIAAAAAAACE+3LMQrCQBRF0a3Iq5PwJ4XF7MDeyiaEcZAUk4TMTyHi3iWCixDu4ZX3vTTdFVXqYwhq5M81Kyots29j8q7m2dUo7dWXkrfL0aa9Dr/guEwlVx/Lqqje+nNrobVwNYvfdWZ20/sEAAAAAAAAAAAAAAAAAAAAAAAAAMAf+ABwGpumeDcAAA==",
+      "wireBytes": 142,
+      "decodedBytes": 14200
+    },
+    "ratioOver100": {
+      "kind": "base64",
+      "data": "H4sIAAAAAAACE+3LMQrCQBRF0a3Iq5PwJ4XF7MDeyiaEcZAUk4TMTyHi3iWCixDu4ZX3vTTdFVXqYwhq5M81Kyots29j8q7m2dUo7dWXkrfL0aa9Dr/guEwlVx/Lqqje+nNrobVwNYvfdWZ20/sEAAAAAAAAAAAAAAAAAAAAAAAAAMA/+ABjJc+5eTcAAA==",
+      "wireBytes": 142,
+      "decodedBytes": 14201
+    },
+    "networkDecompressionTrap": {
+      "kind": "base64",
+      "data": "H4sIAAAAAAACE+3BMQEAAADCoGzrX8oQvkABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJwGIRLgMQEAEAA=",
+      "wireBytes": 1052,
+      "decodedBytes": 1048577
+    }
+  },
+  "sentinels": {
+    "apiKey": "SENTINEL_API_KEY_8c92af",
+    "authorization": "SENTINEL_AUTHORIZATION_5e7bc1",
+    "proxyCredential": "SENTINEL_PROXY_CREDENTIAL_4c831d",
+    "certificatePassword": "SENTINEL_CERTIFICATE_PASSWORD_c144f8",
+    "certificatePath": "/SENTINEL_CERTIFICATE_PATH_0eaf51/client.p12",
+    "payload": "SENTINEL_PAYLOAD_671e2a",
+    "customerId": "SENTINEL_CUSTOMER_ID_297cbb",
+    "fullUrl": "https://SENTINEL_FULL_URL_099dd1.invalid/private/path",
+    "remoteMessage": "SENTINEL_REMOTE_MESSAGE_9bb30f",
+    "idempotencyKey": "SENTINEL_IDEMPOTENCY_KEY_62cc16"
+  },
+  "inputProfiles": {
+    "empty": {
+      "env": {},
+      "send": {
+        "eventType": "contract.sent",
+        "customerId": "cus_contract",
+        "payload": {
+          "value": "ok"
+        },
+        "descriptorVersion": 2
+      },
+      "clock": {
+        "monotonicMs": 0,
+        "defaultNowUnixMs": 1767225600000,
+        "retryAfterWallUnixMs": 1767225600000
+      },
+      "entropy": [
+        125,
+        0,
+        250
+      ],
+      "providerValues": [],
+      "generatedValues": {
+        "idempotencyKeys": [
+          "idem_generated_0001"
+        ]
+      },
+      "sentinelValues": {}
+    },
+    "valid": {
+      "env": {
+        "REPOST_SEND_API_KEY": "rk_contract_fixed"
+      },
+      "send": {
+        "eventType": "contract.sent",
+        "customerId": "cus_contract",
+        "payload": {
+          "value": "ok"
+        },
+        "descriptorVersion": 2
+      },
+      "clock": {
+        "monotonicMs": 0,
+        "defaultNowUnixMs": 1767225600000,
+        "retryAfterWallUnixMs": 1767225600000
+      },
+      "entropy": [
+        125,
+        0,
+        250
+      ],
+      "providerValues": [],
+      "generatedValues": {
+        "idempotencyKeys": [
+          "idem_generated_0001"
+        ]
+      },
+      "sentinelValues": {}
+    }
+  }
+}

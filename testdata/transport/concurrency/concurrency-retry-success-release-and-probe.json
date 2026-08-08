@@ -1,0 +1,239 @@
+{
+  "scenarioId": "concurrency-retry-success-release-and-probe",
+  "description": "A retry that eventually succeeds on a production runtime with maxInFlight one releases its sole permit only after the successful retry; a real successful same-runtime probe then reacquires and releases that permit.",
+  "runtime": {
+    "maxInFlight": 1,
+    "maxBufferedBytes": 33554432
+  },
+  "operations": [
+    {
+      "operationId": "op-retry-success",
+      "input": {
+        "profile": "valid",
+        "entropy": [
+          0
+        ]
+      },
+      "options": {
+        "idempotencyKey": "idem_retry_success",
+        "maxAttempts": 2
+      },
+      "fixtureScript": [
+        {
+          "action": "failConnection",
+          "attempt": 1,
+          "phase": "beforeRequestBytes",
+          "kind": "dns"
+        },
+        {
+          "action": "respond",
+          "attempt": 2,
+          "status": 202,
+          "bodyKind": "valid",
+          "responseBytes": 104
+        }
+      ],
+      "requestBytes": 104
+    },
+    {
+      "operationId": "op-retry-success-probe",
+      "input": {
+        "profile": "valid"
+      },
+      "options": {
+        "idempotencyKey": "idem_retry_success_probe"
+      },
+      "fixtureScript": [
+        {
+          "action": "respond",
+          "attempt": 1,
+          "status": 202,
+          "bodyKind": "valid",
+          "responseBytes": 104
+        }
+      ],
+      "requestBytes": 104
+    }
+  ],
+  "steps": [
+    {
+      "action": "start",
+      "operationId": "op-retry-success"
+    },
+    {
+      "action": "awaitRetryScheduled",
+      "operationId": "op-retry-success",
+      "retryIndex": 1
+    },
+    {
+      "action": "advanceTime",
+      "byMs": 0
+    },
+    {
+      "action": "awaitTerminal",
+      "operationId": "op-retry-success"
+    },
+    {
+      "action": "start",
+      "operationId": "op-retry-success-probe"
+    },
+    {
+      "action": "awaitTerminal",
+      "operationId": "op-retry-success-probe"
+    },
+    {
+      "action": "checkpoint",
+      "name": "retry-success-probed"
+    }
+  ],
+  "expected": {
+    "orderedTrace": [
+      "operation:op-retry-success:permit.acquire:inFlight=1",
+      "operation:op-retry-success:reservation.acquire:reserved=1",
+      "operation:op-retry-success:observer.start",
+      "operation:op-retry-success:retry.schedule:index=1:delayMs=0:inFlight=1",
+      "operation:op-retry-success:permit.release:inFlight=0",
+      "operation:op-retry-success:primary.complete:OK:ACCEPTED",
+      "operation:op-retry-success:outcome.complete:OK:ACCEPTED",
+      "operation:op-retry-success:reservation.release:reserved=0",
+      "operation:op-retry-success:terminal:OK:ACCEPTED:attempts=2",
+      "operation:op-retry-success-probe:permit.acquire:inFlight=1",
+      "operation:op-retry-success-probe:reservation.acquire:reserved=1",
+      "operation:op-retry-success-probe:observer.start",
+      "operation:op-retry-success-probe:permit.release:inFlight=0",
+      "operation:op-retry-success-probe:primary.complete:OK:ACCEPTED",
+      "operation:op-retry-success-probe:outcome.complete:OK:ACCEPTED",
+      "operation:op-retry-success-probe:reservation.release:reserved=0",
+      "operation:op-retry-success-probe:terminal:OK:ACCEPTED:attempts=1",
+      "checkpoint:retry-success-probed:state=OPEN:inFlight=0:queuedWaiters=0"
+    ],
+    "checkpoints": [
+      {
+        "name": "retry-success-probed",
+        "state": "OPEN",
+        "inFlight": 0,
+        "completionReservations": 0,
+        "activeTerminalOperation": null,
+        "queuedTerminalTasks": 0,
+        "currentBufferedBytes": 0,
+        "queuedWaiters": 0,
+        "totalPermitAcquires": 2,
+        "totalPermitRejects": 0,
+        "totalPermitReleases": 2,
+        "totalByteAcquires": 6,
+        "totalByteRejects": 0,
+        "totalByteReleases": 6,
+        "deadlineCallbacks": 0,
+        "terminalDispatches": 0,
+        "ghostWorkAttempts": 0,
+        "diagnostics": {
+          "inFlightOperations": 0,
+          "bufferedBytes": 0,
+          "concurrencyOverloadRejections": 0,
+          "requestByteOverloadRejections": 0,
+          "responseByteOverloadRejections": 0,
+          "responseHeaderLimitFailures": 0,
+          "executorOverloadRejections": 0,
+          "schedulerOverloadRejections": 0,
+          "responseCloseFailures": 0,
+          "droppedObserverEvents": 0,
+          "observerFailures": 0,
+          "closed": false
+        }
+      }
+    ],
+    "operations": [
+      {
+        "operationId": "op-retry-success",
+        "code": "OK",
+        "delivery": "ACCEPTED",
+        "attemptCount": 2,
+        "completionRoute": "OPERATION_EXECUTION",
+        "sideEffects": {
+          "permitAcquires": 1,
+          "permitRejects": 0,
+          "permitReleases": 1,
+          "observerStarts": 1,
+          "configurationSnapshots": 1,
+          "credentialResolutions": 1,
+          "defaultSnapshots": 1,
+          "idempotencyGenerations": 0,
+          "serializations": 1,
+          "networkAttempts": 2,
+          "byteAcquires": 3,
+          "byteRejects": 0,
+          "byteReleases": 3,
+          "deadlineCallbacks": 0,
+          "terminalDispatches": 0,
+          "ghostWorkAttempts": 0,
+          "reservationAcquires": 1,
+          "reservationReleases": 1
+        }
+      },
+      {
+        "operationId": "op-retry-success-probe",
+        "code": "OK",
+        "delivery": "ACCEPTED",
+        "attemptCount": 1,
+        "completionRoute": "OPERATION_EXECUTION",
+        "sideEffects": {
+          "permitAcquires": 1,
+          "permitRejects": 0,
+          "permitReleases": 1,
+          "observerStarts": 1,
+          "configurationSnapshots": 1,
+          "credentialResolutions": 1,
+          "defaultSnapshots": 1,
+          "idempotencyGenerations": 0,
+          "serializations": 1,
+          "networkAttempts": 1,
+          "byteAcquires": 3,
+          "byteRejects": 0,
+          "byteReleases": 3,
+          "deadlineCallbacks": 0,
+          "terminalDispatches": 0,
+          "ghostWorkAttempts": 0,
+          "reservationAcquires": 1,
+          "reservationReleases": 1
+        }
+      }
+    ],
+    "finalRuntime": {
+      "state": "OPEN",
+      "inFlight": 0,
+      "maxObservedInFlight": 1,
+      "completionReservations": 0,
+      "maxObservedCompletionReservations": 1,
+      "activeTerminalOperation": null,
+      "queuedTerminalTasks": 0,
+      "currentBufferedBytes": 0,
+      "maxObservedBufferedBytes": 2359296,
+      "queuedWaiters": 0,
+      "totalPermitAcquires": 2,
+      "totalPermitRejects": 0,
+      "totalPermitReleases": 2,
+      "totalReservationAcquires": 2,
+      "totalReservationReleases": 2,
+      "totalByteAcquires": 6,
+      "totalByteRejects": 0,
+      "totalByteReleases": 6,
+      "deadlineCallbacks": 0,
+      "terminalDispatches": 0,
+      "ghostWorkAttempts": 0,
+      "diagnostics": {
+        "inFlightOperations": 0,
+        "bufferedBytes": 0,
+        "concurrencyOverloadRejections": 0,
+        "requestByteOverloadRejections": 0,
+        "responseByteOverloadRejections": 0,
+        "responseHeaderLimitFailures": 0,
+        "executorOverloadRejections": 0,
+        "schedulerOverloadRejections": 0,
+        "responseCloseFailures": 0,
+        "droppedObserverEvents": 0,
+        "observerFailures": 0,
+        "closed": false
+      }
+    }
+  }
+}

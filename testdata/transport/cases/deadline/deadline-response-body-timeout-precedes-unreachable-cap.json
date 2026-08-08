@@ -1,0 +1,161 @@
+{
+  "caseId": "deadline-response-body-timeout-precedes-unreachable-cap",
+  "category": "deadline",
+  "description": "A reached body timeout is causal before later unseen cap bytes; unreachable payload bytes and trailer cannot reclassify it.",
+  "input": {
+    "profile": "valid"
+  },
+  "options": {
+    "attemptTimeoutMs": 30000,
+    "operationTimeoutMs": 60000,
+    "maxAttempts": 1,
+    "idempotencyKey": "idem_deadline_response_body_timeout_precedes_unreachable_cap"
+  },
+  "script": [
+    {
+      "actor": "fixture",
+      "action": "respond",
+      "attempt": 1,
+      "status": 202,
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": {
+        "kind": "repeat",
+        "byte": 32,
+        "length": 1048577
+      }
+    },
+    {
+      "actor": "fixture",
+      "action": "hold",
+      "attempt": 1,
+      "phase": "responseBody",
+      "barrier": "body-timeout-before-cap",
+      "releaseAt": 16
+    },
+    {
+      "actor": "runner",
+      "action": "advanceTime",
+      "byMs": 30000
+    },
+    {
+      "actor": "runner",
+      "action": "drainRuntimeDiagnostics"
+    }
+  ],
+  "expected": {
+    "configurationTrace": [
+      "credential:REPOST_SEND_API_KEY",
+      "base-url:default",
+      "endpoint-path:/v1/messages",
+      "redirects:false",
+      "snapshot:1"
+    ],
+    "attemptTrace": [
+      "attempt:1:start@0",
+      "attempt:1:commit@0",
+      "attempt:1:response:202@0",
+      "attempt:1:end:attempt-timeout@30000"
+    ],
+    "commitTrace": [
+      "attempt:1:NOT_SENT@0",
+      "attempt:1:POSSIBLY_SENT@0",
+      "operation:POSSIBLY_SENT@0"
+    ],
+    "scheduleTrace": [],
+    "sideEffectTrace": [
+      "permit.acquire",
+      "configuration.snapshot",
+      "credentials.snapshot",
+      "defaults.snapshot",
+      "idempotency.generate:0",
+      "serialize:1",
+      "network:1",
+      "response.cancel",
+      "permit.release"
+    ],
+    "errorTrace": [
+      "terminal:ATTEMPT_TIMEOUT:POSSIBLY_SENT"
+    ],
+    "error": {
+      "code": "ATTEMPT_TIMEOUT",
+      "delivery": "POSSIBLY_SENT",
+      "attemptCount": 1,
+      "httpStatus": 202,
+      "retryable": true,
+      "compressedBytes": 16,
+      "decompressedBytes": 16,
+      "truncated": false,
+      "idempotencyKey": "idem_deadline_response_body_timeout_precedes_unreachable_cap",
+      "message": "Transport attempt timed out",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": "op-0001",
+      "failureReason": "UNKNOWN",
+      "remediationKey": "network.unknown",
+      "causeCategory": "HTTP_RUNTIME",
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [],
+      "configurationIssues": [],
+      "issueCount": 0,
+      "issuesTruncated": false
+    },
+    "legacyBody": {
+      "code": "ATTEMPT_TIMEOUT",
+      "message": "Transport attempt timed out",
+      "truncated": false
+    },
+    "delivery": "POSSIBLY_SENT",
+    "byteTrace": [
+      "response-wire:16:cancelled",
+      "response-decoded:16:cancelled"
+    ],
+    "redactionTrace": [],
+    "fixtureTrace": [
+      "fixture:attempt:1:accepted",
+      "fixture:attempt:1:idempotency:idem_deadline_response_body_timeout_precedes_unreachable_cap",
+      "fixture:attempt:1:response-cancelled:16"
+    ],
+    "result": null,
+    "observerCallbackTrace": [],
+    "primarySurface": "sendOperation",
+    "completionRoute": "TERMINAL_DISPATCHER",
+    "runtimeDiagnostics": {
+      "inFlightOperations": 0,
+      "bufferedBytes": 0,
+      "concurrencyOverloadRejections": 0,
+      "requestByteOverloadRejections": 0,
+      "responseByteOverloadRejections": 0,
+      "responseHeaderLimitFailures": 0,
+      "executorOverloadRejections": 0,
+      "schedulerOverloadRejections": 0,
+      "responseCloseFailures": 0,
+      "droppedObserverEvents": 0,
+      "observerFailures": 0,
+      "closed": false
+    },
+    "outcomeEvidence": {
+      "operationId": "op-0001",
+      "primaryKind": "structured-error",
+      "nativeCancelled": false,
+      "settlements": 1,
+      "code": "ATTEMPT_TIMEOUT",
+      "delivery": "POSSIBLY_SENT",
+      "attemptCount": 1,
+      "httpStatus": 202,
+      "idempotencyKey": "idem_deadline_response_body_timeout_precedes_unreachable_cap",
+      "noGhostWork": true,
+      "failureReason": "UNKNOWN",
+      "remediationKey": "network.unknown",
+      "causeCategory": "HTTP_RUNTIME"
+    },
+    "observerEmissionTrace": [
+      "operation.start|operationId=op-0001",
+      "attempt.start|operationId=op-0001|attempt=1",
+      "attempt.end|operationId=op-0001|attempt=1|durationMs=30000|outcome=attempt-timeout|code=ATTEMPT_TIMEOUT|failureReason=UNKNOWN|delivery=POSSIBLY_SENT|statusClass=2xx",
+      "operation.end|operationId=op-0001|durationMs=30000|outcome=failed|code=ATTEMPT_TIMEOUT|failureReason=UNKNOWN|delivery=POSSIBLY_SENT|attempts=1"
+    ]
+  }
+}

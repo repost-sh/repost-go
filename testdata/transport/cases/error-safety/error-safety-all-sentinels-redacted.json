@@ -1,0 +1,175 @@
+{
+  "caseId": "error-safety-all-sentinels-redacted",
+  "category": "error-safety",
+  "description": "Every unique sensitive sentinel is absent from public error rendering, logs, observer output, metric tags, and spans.",
+  "input": {
+    "profile": "empty",
+    "env": {
+      "REPOST_SEND_API_KEY": "SENTINEL_API_KEY_8c92af"
+    },
+    "send": {
+      "eventType": "contract.sent",
+      "customerId": "SENTINEL_CUSTOMER_ID_297cbb",
+      "payload": {
+        "value": "SENTINEL_PAYLOAD_671e2a"
+      },
+      "descriptorVersion": 2
+    },
+    "sentinelValues": {
+      "authorization": "SENTINEL_AUTHORIZATION_5e7bc1",
+      "remoteMessage": "SENTINEL_REMOTE_MESSAGE_9bb30f"
+    }
+  },
+  "options": {
+    "baseUrl": "https://SENTINEL_FULL_URL_099dd1.invalid/private/path",
+    "proxyCredential": "SENTINEL_PROXY_CREDENTIAL_4c831d",
+    "clientCertificatePassword": "SENTINEL_CERTIFICATE_PASSWORD_c144f8",
+    "clientCertificatePath": "/SENTINEL_CERTIFICATE_PATH_0eaf51/client.p12",
+    "idempotencyKey": "SENTINEL_IDEMPOTENCY_KEY_62cc16"
+  },
+  "script": [
+    {
+      "actor": "fixture",
+      "action": "respondEchoSentinels",
+      "attempt": 1,
+      "status": 400,
+      "sentinels": [
+        "apiKey",
+        "authorization",
+        "proxyCredential",
+        "certificatePassword",
+        "certificatePath",
+        "payload",
+        "customerId",
+        "fullUrl",
+        "remoteMessage",
+        "idempotencyKey"
+      ]
+    },
+    {
+      "actor": "runner",
+      "action": "drainRuntimeDiagnostics"
+    }
+  ],
+  "expected": {
+    "configurationTrace": [
+      "credential:REPOST_SEND_API_KEY",
+      "base-url:baseUrl",
+      "endpoint-path:/private/path/v1/messages",
+      "redirects:false",
+      "snapshot:1"
+    ],
+    "attemptTrace": [
+      "attempt:1:start@0",
+      "attempt:1:commit@0",
+      "attempt:1:response:400@0",
+      "attempt:1:end:http-rejected@0"
+    ],
+    "commitTrace": [
+      "attempt:1:NOT_SENT@0",
+      "attempt:1:POSSIBLY_SENT@0",
+      "operation:POSSIBLY_SENT@0"
+    ],
+    "scheduleTrace": [],
+    "sideEffectTrace": [
+      "permit.acquire",
+      "configuration.snapshot",
+      "credentials.snapshot",
+      "defaults.snapshot",
+      "idempotency.generate:0",
+      "serialize:1",
+      "network:1",
+      "permit.release"
+    ],
+    "errorTrace": [
+      "terminal:HTTP_REJECTED:REJECTED"
+    ],
+    "error": {
+      "code": "HTTP_REJECTED",
+      "delivery": "REJECTED",
+      "attemptCount": 1,
+      "httpStatus": 400,
+      "retryable": false,
+      "compressedBytes": 599,
+      "decompressedBytes": 599,
+      "truncated": false,
+      "idempotencyKey": "SENTINEL_IDEMPOTENCY_KEY_62cc16",
+      "message": "Request was rejected",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": "op-0001",
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [],
+      "configurationIssues": [],
+      "issueCount": 0,
+      "issuesTruncated": false,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "delivery": "REJECTED",
+    "byteTrace": [
+      "response-wire:599:accepted",
+      "response-decoded:599:accepted",
+      "error-discarded:599:accepted"
+    ],
+    "redactionTrace": [
+      "scan:render:clean",
+      "scan:logs:clean",
+      "scan:observer:clean",
+      "scan:metric-tags:clean",
+      "scan:spans:clean",
+      "allow:error.idempotencyKey:1"
+    ],
+    "fixtureTrace": [
+      "fixture:attempt:1:accepted",
+      "fixture:attempt:1:idempotency:SENTINEL_IDEMPOTENCY_KEY_62cc16",
+      "fixture:attempt:1:response-bytes:599"
+    ],
+    "result": null,
+    "legacyBody": {
+      "code": "HTTP_REJECTED",
+      "message": "Request was rejected",
+      "truncated": false
+    },
+    "outcomeEvidence": {
+      "operationId": "op-0001",
+      "primaryKind": "structured-error",
+      "nativeCancelled": false,
+      "settlements": 1,
+      "code": "HTTP_REJECTED",
+      "delivery": "REJECTED",
+      "attemptCount": 1,
+      "httpStatus": 400,
+      "idempotencyKey": "SENTINEL_IDEMPOTENCY_KEY_62cc16",
+      "noGhostWork": true,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "primarySurface": "sendOperation",
+    "runtimeDiagnostics": {
+      "inFlightOperations": 0,
+      "bufferedBytes": 0,
+      "concurrencyOverloadRejections": 0,
+      "requestByteOverloadRejections": 0,
+      "responseByteOverloadRejections": 0,
+      "responseHeaderLimitFailures": 0,
+      "executorOverloadRejections": 0,
+      "schedulerOverloadRejections": 0,
+      "responseCloseFailures": 0,
+      "droppedObserverEvents": 0,
+      "observerFailures": 0,
+      "closed": false
+    },
+    "completionRoute": "OPERATION_EXECUTION",
+    "observerCallbackTrace": [],
+    "observerEmissionTrace": [
+      "operation.start|operationId=op-0001",
+      "attempt.start|operationId=op-0001|attempt=1",
+      "attempt.end|operationId=op-0001|attempt=1|durationMs=0|outcome=http-rejected|code=HTTP_REJECTED|failureReason=NONE|delivery=REJECTED|statusClass=4xx",
+      "operation.end|operationId=op-0001|durationMs=0|outcome=rejected|code=HTTP_REJECTED|failureReason=NONE|delivery=REJECTED|attempts=1"
+    ]
+  }
+}

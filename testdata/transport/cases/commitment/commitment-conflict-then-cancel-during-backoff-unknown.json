@@ -1,0 +1,171 @@
+{
+  "caseId": "commitment-conflict-then-cancel-during-backoff-unknown",
+  "category": "commitment",
+  "description": "Cancellation during backoff after ambiguous HTTP 409 preserves uncertainty as CANCELLED_UNKNOWN and starts no later attempt.",
+  "input": {
+    "profile": "valid",
+    "entropy": [
+      250
+    ],
+    "observerContext": "ctx-parent-cancel"
+  },
+  "options": {
+    "idempotencyKey": "idem_conflict_cancel_backoff"
+  },
+  "script": [
+    {
+      "actor": "fixture",
+      "action": "respond",
+      "attempt": 1,
+      "status": 409,
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": {
+        "asset": "remoteError"
+      }
+    },
+    {
+      "actor": "runner",
+      "action": "cancelSend",
+      "phase": "backoff"
+    },
+    {
+      "actor": "runner",
+      "action": "drainRuntimeDiagnostics"
+    }
+  ],
+  "expected": {
+    "configurationTrace": [
+      "credential:REPOST_SEND_API_KEY",
+      "base-url:default",
+      "endpoint-path:/v1/messages",
+      "redirects:false",
+      "snapshot:1"
+    ],
+    "attemptTrace": [
+      "attempt:1:start@0",
+      "attempt:1:commit@0",
+      "attempt:1:response:409@0",
+      "attempt:1:end:conflict@0"
+    ],
+    "commitTrace": [
+      "attempt:1:NOT_SENT@0",
+      "attempt:1:POSSIBLY_SENT@0",
+      "operation:POSSIBLY_SENT@0"
+    ],
+    "scheduleTrace": [
+      "retry:1:cap=250@0",
+      "retry:1:bound=251@0",
+      "retry:1:entropy=250@0",
+      "retry:1:delay=250@0",
+      "retry:1:cancelled=0@0"
+    ],
+    "sideEffectTrace": [
+      "permit.acquire",
+      "configuration.snapshot",
+      "credentials.snapshot",
+      "defaults.snapshot",
+      "idempotency.generate:0",
+      "serialize:1",
+      "network:1",
+      "permit.release"
+    ],
+    "errorTrace": [
+      "terminal:CANCELLED:CANCELLED_UNKNOWN"
+    ],
+    "error": {
+      "code": "CANCELLED",
+      "delivery": "CANCELLED_UNKNOWN",
+      "attemptCount": 1,
+      "httpStatus": 409,
+      "retryable": false,
+      "compressedBytes": 90,
+      "decompressedBytes": 90,
+      "truncated": false,
+      "idempotencyKey": "idem_conflict_cancel_backoff",
+      "message": "Operation cancelled",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": "op-0001",
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [],
+      "configurationIssues": [],
+      "issueCount": 0,
+      "issuesTruncated": false,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "delivery": "CANCELLED_UNKNOWN",
+    "byteTrace": [
+      "response-wire:90:accepted",
+      "response-decoded:90:accepted",
+      "error-discarded:90:accepted"
+    ],
+    "redactionTrace": [
+      "scan:render:clean",
+      "scan:logs:clean",
+      "scan:observer:clean",
+      "scan:metric-tags:clean",
+      "scan:spans:clean"
+    ],
+    "contextTrace": [
+      "caller.set|token=ctx-parent-cancel",
+      "operation.capture|token=ctx-parent-cancel",
+      "caller.restore|token=ctx-parent-cancel"
+    ],
+    "fixtureTrace": [
+      "fixture:attempt:1:accepted",
+      "fixture:attempt:1:idempotency:idem_conflict_cancel_backoff",
+      "fixture:attempt:1:response-bytes:90"
+    ],
+    "result": null,
+    "legacyBody": {
+      "code": "CANCELLED",
+      "message": "Operation cancelled",
+      "truncated": false
+    },
+    "outcomeEvidence": {
+      "operationId": "op-0001",
+      "primaryKind": "native-cancel",
+      "nativeCancelled": true,
+      "settlements": 1,
+      "code": "CANCELLED",
+      "delivery": "CANCELLED_UNKNOWN",
+      "attemptCount": 1,
+      "httpStatus": 409,
+      "idempotencyKey": "idem_conflict_cancel_backoff",
+      "noGhostWork": true,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "primarySurface": "sendOperation",
+    "runtimeDiagnostics": {
+      "inFlightOperations": 0,
+      "bufferedBytes": 0,
+      "concurrencyOverloadRejections": 0,
+      "requestByteOverloadRejections": 0,
+      "responseByteOverloadRejections": 0,
+      "responseHeaderLimitFailures": 0,
+      "executorOverloadRejections": 0,
+      "schedulerOverloadRejections": 0,
+      "responseCloseFailures": 0,
+      "droppedObserverEvents": 0,
+      "observerFailures": 0,
+      "closed": false
+    },
+    "completionRoute": "NATIVE_CANCEL",
+    "observerCallbackTrace": [],
+    "observerEmissionTrace": [
+      "operation.start|operationId=op-0001",
+      "attempt.start|operationId=op-0001|attempt=1",
+      "attempt.end|operationId=op-0001|attempt=1|durationMs=0|outcome=conflict|code=HTTP_REJECTED|failureReason=NONE|delivery=POSSIBLY_SENT|statusClass=4xx",
+      "retry.delay|operationId=op-0001|attempt=2|delayMs=250",
+      "operation.cancel|operationId=op-0001|delivery=CANCELLED_UNKNOWN",
+      "operation.end|operationId=op-0001|durationMs=0|outcome=cancelled|code=CANCELLED|failureReason=NONE|delivery=CANCELLED_UNKNOWN|attempts=1"
+    ]
+  }
+}

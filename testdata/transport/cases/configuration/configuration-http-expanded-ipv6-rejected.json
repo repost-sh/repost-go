@@ -1,0 +1,78 @@
+{
+  "caseId": "configuration-http-expanded-ipv6-rejected",
+  "category": "configuration",
+  "description": "The plain-HTTP loopback development exception is validated against raw canonical authority syntax before URI normalization.",
+  "input": {
+    "profile": "valid"
+  },
+  "options": {
+    "baseUrl": "http://[0:0:0:0:0:0:0:1]:4323/base"
+  },
+  "script": [],
+  "expected": {
+    "configurationTrace": [
+      "snapshot:0"
+    ],
+    "attemptTrace": [],
+    "commitTrace": [],
+    "scheduleTrace": [],
+    "sideEffectTrace": [],
+    "errorTrace": [
+      "terminal:CONFIGURATION:NOT_SENT"
+    ],
+    "error": {
+      "code": "CONFIGURATION",
+      "delivery": "NOT_SENT",
+      "attemptCount": 0,
+      "httpStatus": null,
+      "retryable": false,
+      "compressedBytes": 0,
+      "decompressedBytes": 0,
+      "truncated": false,
+      "idempotencyKey": null,
+      "message": "Invalid transport configuration",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": null,
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [],
+      "configurationIssues": [
+        {
+          "code": "INVALID_VALUE",
+          "optionKeys": [
+            "BASE_URI"
+          ]
+        }
+      ],
+      "issueCount": 1,
+      "issuesTruncated": false,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "delivery": "NOT_SENT",
+    "byteTrace": [],
+    "redactionTrace": [],
+    "fixtureTrace": [],
+    "result": null,
+    "legacyBody": {
+      "code": "CONFIGURATION",
+      "message": "Invalid transport configuration",
+      "truncated": false
+    },
+    "primarySurface": "constructionThrow",
+    "completionRoute": null,
+    "observerCallbackTrace": [],
+    "constructionEvidence": {
+      "code": "CONFIGURATION",
+      "message": "Invalid transport configuration",
+      "operationId": null,
+      "idempotencyKey": null,
+      "admitted": false,
+      "settlements": 0,
+      "causeCategory": null
+    },
+    "observerEmissionTrace": []
+  }
+}

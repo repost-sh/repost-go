@@ -1,0 +1,137 @@
+{
+  "caseId": "cancellation-close-during-send",
+  "category": "cancellation",
+  "description": "Closing a client during a committed send returns CLOSED/CANCELLED_UNKNOWN and releases once.",
+  "input": {
+    "profile": "valid"
+  },
+  "options": {
+    "idempotencyKey": "idem_close"
+  },
+  "script": [
+    {
+      "actor": "fixture",
+      "action": "hold",
+      "attempt": 1,
+      "phase": "responseHeaders",
+      "barrier": "close"
+    },
+    {
+      "actor": "runner",
+      "action": "closeClient",
+      "phase": "responseHeaders"
+    },
+    {
+      "actor": "runner",
+      "action": "drainRuntimeDiagnostics"
+    }
+  ],
+  "expected": {
+    "configurationTrace": [
+      "credential:REPOST_SEND_API_KEY",
+      "base-url:default",
+      "endpoint-path:/v1/messages",
+      "redirects:false",
+      "snapshot:1"
+    ],
+    "attemptTrace": [
+      "attempt:1:start@0",
+      "attempt:1:commit@0",
+      "attempt:1:end:closed@0"
+    ],
+    "commitTrace": [
+      "attempt:1:NOT_SENT@0",
+      "attempt:1:POSSIBLY_SENT@0",
+      "operation:POSSIBLY_SENT@0"
+    ],
+    "scheduleTrace": [],
+    "sideEffectTrace": [
+      "permit.acquire",
+      "configuration.snapshot",
+      "credentials.snapshot",
+      "defaults.snapshot",
+      "idempotency.generate:0",
+      "serialize:1",
+      "network:1",
+      "permit.release"
+    ],
+    "errorTrace": [
+      "terminal:CLOSED:CANCELLED_UNKNOWN"
+    ],
+    "error": {
+      "code": "CLOSED",
+      "delivery": "CANCELLED_UNKNOWN",
+      "attemptCount": 1,
+      "httpStatus": null,
+      "retryable": false,
+      "compressedBytes": 0,
+      "decompressedBytes": 0,
+      "truncated": false,
+      "idempotencyKey": "idem_close",
+      "message": "Client is closed",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": "op-0001",
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [],
+      "configurationIssues": [],
+      "issueCount": 0,
+      "issuesTruncated": false,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "delivery": "CANCELLED_UNKNOWN",
+    "byteTrace": [],
+    "redactionTrace": [],
+    "fixtureTrace": [
+      "fixture:attempt:1:accepted",
+      "fixture:attempt:1:idempotency:idem_close"
+    ],
+    "result": null,
+    "legacyBody": {
+      "code": "CLOSED",
+      "message": "Client is closed",
+      "truncated": false
+    },
+    "outcomeEvidence": {
+      "operationId": "op-0001",
+      "primaryKind": "structured-error",
+      "nativeCancelled": false,
+      "settlements": 1,
+      "code": "CLOSED",
+      "delivery": "CANCELLED_UNKNOWN",
+      "attemptCount": 1,
+      "httpStatus": null,
+      "idempotencyKey": "idem_close",
+      "noGhostWork": true,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "primarySurface": "sendOperation",
+    "runtimeDiagnostics": {
+      "inFlightOperations": 0,
+      "bufferedBytes": 0,
+      "concurrencyOverloadRejections": 0,
+      "requestByteOverloadRejections": 0,
+      "responseByteOverloadRejections": 0,
+      "responseHeaderLimitFailures": 0,
+      "executorOverloadRejections": 0,
+      "schedulerOverloadRejections": 0,
+      "responseCloseFailures": 0,
+      "droppedObserverEvents": 0,
+      "observerFailures": 0,
+      "closed": true
+    },
+    "completionRoute": "TERMINAL_DISPATCHER",
+    "observerCallbackTrace": [],
+    "observerEmissionTrace": [
+      "operation.start|operationId=op-0001",
+      "attempt.start|operationId=op-0001|attempt=1",
+      "attempt.end|operationId=op-0001|attempt=1|durationMs=0|outcome=closed|code=CLOSED|failureReason=NONE|delivery=CANCELLED_UNKNOWN|statusClass=none",
+      "operation.end|operationId=op-0001|durationMs=0|outcome=failed|code=CLOSED|failureReason=NONE|delivery=CANCELLED_UNKNOWN|attempts=1"
+    ]
+  }
+}

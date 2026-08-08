@@ -1,0 +1,170 @@
+{
+  "caseId": "cancellation-close-during-backoff-after-uncertain-attempt",
+  "category": "cancellation",
+  "description": "Runtime close cancels pending retry work after an unresolved committed attempt, starts no second attempt, and settles CANCELLED_UNKNOWN.",
+  "input": {
+    "profile": "valid",
+    "entropy": [
+      250
+    ],
+    "observerContext": "ctx-parent-cancel"
+  },
+  "options": {
+    "idempotencyKey": "idem_close_backoff_uncertain"
+  },
+  "script": [
+    {
+      "actor": "fixture",
+      "action": "respond",
+      "attempt": 1,
+      "status": 500,
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": {
+        "asset": "remoteError"
+      }
+    },
+    {
+      "actor": "runner",
+      "action": "closeClient",
+      "phase": "backoff"
+    },
+    {
+      "actor": "runner",
+      "action": "drainRuntimeDiagnostics"
+    }
+  ],
+  "expected": {
+    "configurationTrace": [
+      "credential:REPOST_SEND_API_KEY",
+      "base-url:default",
+      "endpoint-path:/v1/messages",
+      "redirects:false",
+      "snapshot:1"
+    ],
+    "attemptTrace": [
+      "attempt:1:start@0",
+      "attempt:1:commit@0",
+      "attempt:1:response:500@0",
+      "attempt:1:end:server-failure@0"
+    ],
+    "commitTrace": [
+      "attempt:1:NOT_SENT@0",
+      "attempt:1:POSSIBLY_SENT@0",
+      "operation:POSSIBLY_SENT@0"
+    ],
+    "scheduleTrace": [
+      "retry:1:cap=250@0",
+      "retry:1:bound=251@0",
+      "retry:1:entropy=250@0",
+      "retry:1:delay=250@0",
+      "retry:1:cancelled=0@0"
+    ],
+    "sideEffectTrace": [
+      "permit.acquire",
+      "configuration.snapshot",
+      "credentials.snapshot",
+      "defaults.snapshot",
+      "idempotency.generate:0",
+      "serialize:1",
+      "network:1",
+      "permit.release"
+    ],
+    "errorTrace": [
+      "terminal:CLOSED:CANCELLED_UNKNOWN"
+    ],
+    "error": {
+      "code": "CLOSED",
+      "delivery": "CANCELLED_UNKNOWN",
+      "attemptCount": 1,
+      "httpStatus": 500,
+      "retryable": false,
+      "compressedBytes": 90,
+      "decompressedBytes": 90,
+      "truncated": false,
+      "idempotencyKey": "idem_close_backoff_uncertain",
+      "message": "Client is closed",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": "op-0001",
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [],
+      "configurationIssues": [],
+      "issueCount": 0,
+      "issuesTruncated": false,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "delivery": "CANCELLED_UNKNOWN",
+    "byteTrace": [
+      "response-wire:90:accepted",
+      "response-decoded:90:accepted",
+      "error-discarded:90:accepted"
+    ],
+    "redactionTrace": [
+      "scan:render:clean",
+      "scan:logs:clean",
+      "scan:observer:clean",
+      "scan:metric-tags:clean",
+      "scan:spans:clean"
+    ],
+    "contextTrace": [
+      "caller.set|token=ctx-parent-cancel",
+      "operation.capture|token=ctx-parent-cancel",
+      "caller.restore|token=ctx-parent-cancel"
+    ],
+    "fixtureTrace": [
+      "fixture:attempt:1:accepted",
+      "fixture:attempt:1:idempotency:idem_close_backoff_uncertain",
+      "fixture:attempt:1:response-bytes:90"
+    ],
+    "result": null,
+    "legacyBody": {
+      "code": "CLOSED",
+      "message": "Client is closed",
+      "truncated": false
+    },
+    "outcomeEvidence": {
+      "operationId": "op-0001",
+      "primaryKind": "structured-error",
+      "nativeCancelled": false,
+      "settlements": 1,
+      "code": "CLOSED",
+      "delivery": "CANCELLED_UNKNOWN",
+      "attemptCount": 1,
+      "httpStatus": 500,
+      "idempotencyKey": "idem_close_backoff_uncertain",
+      "noGhostWork": true,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "primarySurface": "sendOperation",
+    "runtimeDiagnostics": {
+      "inFlightOperations": 0,
+      "bufferedBytes": 0,
+      "concurrencyOverloadRejections": 0,
+      "requestByteOverloadRejections": 0,
+      "responseByteOverloadRejections": 0,
+      "responseHeaderLimitFailures": 0,
+      "executorOverloadRejections": 0,
+      "schedulerOverloadRejections": 0,
+      "responseCloseFailures": 0,
+      "droppedObserverEvents": 0,
+      "observerFailures": 0,
+      "closed": true
+    },
+    "completionRoute": "TERMINAL_DISPATCHER",
+    "observerCallbackTrace": [],
+    "observerEmissionTrace": [
+      "operation.start|operationId=op-0001",
+      "attempt.start|operationId=op-0001|attempt=1",
+      "attempt.end|operationId=op-0001|attempt=1|durationMs=0|outcome=server-failure|code=SERVER_FAILURE|failureReason=NONE|delivery=POSSIBLY_SENT|statusClass=5xx",
+      "retry.delay|operationId=op-0001|attempt=2|delayMs=250",
+      "operation.end|operationId=op-0001|durationMs=0|outcome=failed|code=CLOSED|failureReason=NONE|delivery=CANCELLED_UNKNOWN|attempts=1"
+    ]
+  }
+}

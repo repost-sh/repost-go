@@ -1,0 +1,138 @@
+{
+  "caseId": "deadline-before-request-attempt-wins-before-longer-connect",
+  "category": "deadline",
+  "description": "Before request bytes, the attempt deadline applies alongside connect and operation deadlines and wins when strictly earliest.",
+  "input": {
+    "profile": "valid"
+  },
+  "options": {
+    "connectTimeoutMs": 5000,
+    "attemptTimeoutMs": 1000,
+    "operationTimeoutMs": 10000,
+    "maxAttempts": 1,
+    "idempotencyKey": "idem_attempt_before_connect"
+  },
+  "script": [
+    {
+      "actor": "fixture",
+      "action": "hold",
+      "attempt": 1,
+      "phase": "beforeRequestBytes",
+      "barrier": "attempt-before-connect"
+    },
+    {
+      "actor": "runner",
+      "action": "advanceTime",
+      "byMs": 1000
+    },
+    {
+      "actor": "runner",
+      "action": "drainRuntimeDiagnostics"
+    }
+  ],
+  "expected": {
+    "configurationTrace": [
+      "credential:REPOST_SEND_API_KEY",
+      "base-url:default",
+      "endpoint-path:/v1/messages",
+      "redirects:false",
+      "snapshot:1"
+    ],
+    "attemptTrace": [
+      "attempt:1:start@0",
+      "attempt:1:end:attempt-timeout@1000"
+    ],
+    "commitTrace": [
+      "attempt:1:NOT_SENT@0"
+    ],
+    "scheduleTrace": [],
+    "sideEffectTrace": [
+      "permit.acquire",
+      "configuration.snapshot",
+      "credentials.snapshot",
+      "defaults.snapshot",
+      "idempotency.generate:0",
+      "serialize:1",
+      "network:1",
+      "permit.release"
+    ],
+    "errorTrace": [
+      "terminal:ATTEMPT_TIMEOUT:NOT_SENT"
+    ],
+    "error": {
+      "code": "ATTEMPT_TIMEOUT",
+      "delivery": "NOT_SENT",
+      "attemptCount": 1,
+      "httpStatus": null,
+      "retryable": true,
+      "compressedBytes": 0,
+      "decompressedBytes": 0,
+      "truncated": false,
+      "idempotencyKey": "idem_attempt_before_connect",
+      "message": "Transport attempt timed out",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": "op-0001",
+      "failureReason": "UNKNOWN",
+      "remediationKey": "network.unknown",
+      "causeCategory": "HTTP_RUNTIME",
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [],
+      "configurationIssues": [],
+      "issueCount": 0,
+      "issuesTruncated": false
+    },
+    "legacyBody": {
+      "code": "ATTEMPT_TIMEOUT",
+      "message": "Transport attempt timed out",
+      "truncated": false
+    },
+    "delivery": "NOT_SENT",
+    "byteTrace": [],
+    "redactionTrace": [],
+    "fixtureTrace": [
+      "fixture:attempt:1:accepted",
+      "fixture:attempt:1:idempotency:idem_attempt_before_connect"
+    ],
+    "result": null,
+    "observerCallbackTrace": [],
+    "primarySurface": "sendOperation",
+    "completionRoute": "TERMINAL_DISPATCHER",
+    "runtimeDiagnostics": {
+      "inFlightOperations": 0,
+      "bufferedBytes": 0,
+      "concurrencyOverloadRejections": 0,
+      "requestByteOverloadRejections": 0,
+      "responseByteOverloadRejections": 0,
+      "responseHeaderLimitFailures": 0,
+      "executorOverloadRejections": 0,
+      "schedulerOverloadRejections": 0,
+      "responseCloseFailures": 0,
+      "droppedObserverEvents": 0,
+      "observerFailures": 0,
+      "closed": false
+    },
+    "outcomeEvidence": {
+      "operationId": "op-0001",
+      "primaryKind": "structured-error",
+      "nativeCancelled": false,
+      "settlements": 1,
+      "code": "ATTEMPT_TIMEOUT",
+      "delivery": "NOT_SENT",
+      "attemptCount": 1,
+      "httpStatus": null,
+      "idempotencyKey": "idem_attempt_before_connect",
+      "noGhostWork": true,
+      "failureReason": "UNKNOWN",
+      "remediationKey": "network.unknown",
+      "causeCategory": "HTTP_RUNTIME"
+    },
+    "observerEmissionTrace": [
+      "operation.start|operationId=op-0001",
+      "attempt.start|operationId=op-0001|attempt=1",
+      "attempt.end|operationId=op-0001|attempt=1|durationMs=1000|outcome=attempt-timeout|code=ATTEMPT_TIMEOUT|failureReason=UNKNOWN|delivery=NOT_SENT|statusClass=none",
+      "operation.end|operationId=op-0001|durationMs=1000|outcome=failed|code=ATTEMPT_TIMEOUT|failureReason=UNKNOWN|delivery=NOT_SENT|attempts=1"
+    ]
+  }
+}

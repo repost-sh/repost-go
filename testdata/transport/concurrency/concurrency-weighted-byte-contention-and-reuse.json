@@ -1,0 +1,372 @@
+{
+  "scenarioId": "concurrency-weighted-byte-contention-and-reuse",
+  "description": "One operation atomically reserves the portable 2359296-byte request, response, and parser-scratch set and converts request workspace to an exact retained 1 MiB request. A concurrent operation cannot acquire another complete set from the 4 MiB minimum and fails before observer/configuration/hooks/serialization/network with OVERLOADED/NOT_SENT and no partial byte acquisition. Releasing the held operation and then admitting an exact-1 MiB request plus exact-1 MiB response proves response/parser reservations have no post-publication rejection and all permits are reusable.",
+  "runtime": {
+    "maxInFlight": 2,
+    "maxBufferedBytes": 4194304
+  },
+  "operations": [
+    {
+      "operationId": "op-buffer-held",
+      "input": {
+        "profile": "valid"
+      },
+      "options": {
+        "idempotencyKey": "idem_buffer_held"
+      },
+      "requestBytes": 1048576,
+      "fixtureScript": [
+        {
+          "action": "hold",
+          "attempt": 1,
+          "phase": "beforeRequestBytes",
+          "barrier": "buffer-held"
+        },
+        {
+          "action": "respond",
+          "attempt": 1,
+          "status": 202,
+          "bodyKind": "valid",
+          "responseBytes": 104
+        }
+      ]
+    },
+    {
+      "operationId": "op-buffer-overflow",
+      "input": {
+        "profile": "valid"
+      },
+      "options": {
+        "idempotencyKey": "idem_buffer_overflow"
+      },
+      "requestBytes": 1048576,
+      "fixtureScript": [
+        {
+          "action": "respond",
+          "attempt": 1,
+          "status": 202,
+          "bodyKind": "valid",
+          "responseBytes": 104
+        }
+      ]
+    },
+    {
+      "operationId": "op-buffer-probe",
+      "input": {
+        "profile": "valid"
+      },
+      "options": {
+        "idempotencyKey": "idem_buffer_probe"
+      },
+      "requestBytes": 1048576,
+      "fixtureScript": [
+        {
+          "action": "respond",
+          "attempt": 1,
+          "status": 202,
+          "bodyKind": "valid",
+          "responseBytes": 1048576
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "action": "start",
+      "operationId": "op-buffer-held"
+    },
+    {
+      "action": "awaitBarrier",
+      "operationId": "op-buffer-held",
+      "barrier": "buffer-held"
+    },
+    {
+      "action": "checkpoint",
+      "name": "bytes-retained"
+    },
+    {
+      "action": "start",
+      "operationId": "op-buffer-overflow"
+    },
+    {
+      "action": "awaitTerminal",
+      "operationId": "op-buffer-overflow"
+    },
+    {
+      "action": "checkpoint",
+      "name": "byte-overflow-rejected"
+    },
+    {
+      "action": "release",
+      "barrier": "buffer-held"
+    },
+    {
+      "action": "awaitTerminal",
+      "operationId": "op-buffer-held"
+    },
+    {
+      "action": "start",
+      "operationId": "op-buffer-probe"
+    },
+    {
+      "action": "awaitTerminal",
+      "operationId": "op-buffer-probe"
+    },
+    {
+      "action": "checkpoint",
+      "name": "bytes-reused"
+    }
+  ],
+  "expected": {
+    "orderedTrace": [
+      "operation:op-buffer-held:permit.acquire:inFlight=1",
+      "operation:op-buffer-held:reservation.acquire:reserved=1",
+      "operation:op-buffer-held:observer.start",
+      "barrier:buffer-held:reached:operation=op-buffer-held:inFlight=1",
+      "checkpoint:bytes-retained:state=OPEN:inFlight=1:queuedWaiters=0",
+      "operation:op-buffer-overflow:permit.acquire:inFlight=2",
+      "operation:op-buffer-overflow:reservation.acquire:reserved=2",
+      "operation:op-buffer-overflow:permit.release:inFlight=1",
+      "operation:op-buffer-overflow:primary.complete:OVERLOADED:NOT_SENT",
+      "operation:op-buffer-overflow:outcome.complete:OVERLOADED:NOT_SENT",
+      "operation:op-buffer-overflow:reservation.release:reserved=1",
+      "operation:op-buffer-overflow:terminal:OVERLOADED:NOT_SENT:attempts=0",
+      "checkpoint:byte-overflow-rejected:state=OPEN:inFlight=1:queuedWaiters=0",
+      "operation:op-buffer-held:permit.release:inFlight=0",
+      "operation:op-buffer-held:primary.complete:OK:ACCEPTED",
+      "operation:op-buffer-held:outcome.complete:OK:ACCEPTED",
+      "operation:op-buffer-held:reservation.release:reserved=0",
+      "operation:op-buffer-held:terminal:OK:ACCEPTED:attempts=1",
+      "operation:op-buffer-probe:permit.acquire:inFlight=1",
+      "operation:op-buffer-probe:reservation.acquire:reserved=1",
+      "operation:op-buffer-probe:observer.start",
+      "operation:op-buffer-probe:permit.release:inFlight=0",
+      "operation:op-buffer-probe:primary.complete:OK:ACCEPTED",
+      "operation:op-buffer-probe:outcome.complete:OK:ACCEPTED",
+      "operation:op-buffer-probe:reservation.release:reserved=0",
+      "operation:op-buffer-probe:terminal:OK:ACCEPTED:attempts=1",
+      "checkpoint:bytes-reused:state=OPEN:inFlight=0:queuedWaiters=0"
+    ],
+    "checkpoints": [
+      {
+        "name": "bytes-retained",
+        "state": "OPEN",
+        "inFlight": 1,
+        "completionReservations": 1,
+        "activeTerminalOperation": null,
+        "queuedTerminalTasks": 0,
+        "currentBufferedBytes": 2359296,
+        "queuedWaiters": 0,
+        "totalPermitAcquires": 1,
+        "totalPermitRejects": 0,
+        "totalPermitReleases": 0,
+        "totalByteAcquires": 3,
+        "totalByteRejects": 0,
+        "totalByteReleases": 0,
+        "deadlineCallbacks": 0,
+        "terminalDispatches": 0,
+        "ghostWorkAttempts": 0,
+        "diagnostics": {
+          "inFlightOperations": 1,
+          "bufferedBytes": 2359296,
+          "concurrencyOverloadRejections": 0,
+          "requestByteOverloadRejections": 0,
+          "responseByteOverloadRejections": 0,
+          "responseHeaderLimitFailures": 0,
+          "executorOverloadRejections": 0,
+          "schedulerOverloadRejections": 0,
+          "responseCloseFailures": 0,
+          "droppedObserverEvents": 0,
+          "observerFailures": 0,
+          "closed": false
+        }
+      },
+      {
+        "name": "byte-overflow-rejected",
+        "state": "OPEN",
+        "inFlight": 1,
+        "completionReservations": 1,
+        "activeTerminalOperation": null,
+        "queuedTerminalTasks": 0,
+        "currentBufferedBytes": 2359296,
+        "queuedWaiters": 0,
+        "totalPermitAcquires": 2,
+        "totalPermitRejects": 0,
+        "totalPermitReleases": 1,
+        "totalByteAcquires": 3,
+        "totalByteRejects": 1,
+        "totalByteReleases": 0,
+        "deadlineCallbacks": 0,
+        "terminalDispatches": 0,
+        "ghostWorkAttempts": 0,
+        "diagnostics": {
+          "inFlightOperations": 1,
+          "bufferedBytes": 2359296,
+          "concurrencyOverloadRejections": 0,
+          "requestByteOverloadRejections": 1,
+          "responseByteOverloadRejections": 0,
+          "responseHeaderLimitFailures": 0,
+          "executorOverloadRejections": 0,
+          "schedulerOverloadRejections": 0,
+          "responseCloseFailures": 0,
+          "droppedObserverEvents": 0,
+          "observerFailures": 0,
+          "closed": false
+        }
+      },
+      {
+        "name": "bytes-reused",
+        "state": "OPEN",
+        "inFlight": 0,
+        "completionReservations": 0,
+        "activeTerminalOperation": null,
+        "queuedTerminalTasks": 0,
+        "currentBufferedBytes": 0,
+        "queuedWaiters": 0,
+        "totalPermitAcquires": 3,
+        "totalPermitRejects": 0,
+        "totalPermitReleases": 3,
+        "totalByteAcquires": 6,
+        "totalByteRejects": 1,
+        "totalByteReleases": 6,
+        "deadlineCallbacks": 0,
+        "terminalDispatches": 0,
+        "ghostWorkAttempts": 0,
+        "diagnostics": {
+          "inFlightOperations": 0,
+          "bufferedBytes": 0,
+          "concurrencyOverloadRejections": 0,
+          "requestByteOverloadRejections": 1,
+          "responseByteOverloadRejections": 0,
+          "responseHeaderLimitFailures": 0,
+          "executorOverloadRejections": 0,
+          "schedulerOverloadRejections": 0,
+          "responseCloseFailures": 0,
+          "droppedObserverEvents": 0,
+          "observerFailures": 0,
+          "closed": false
+        }
+      }
+    ],
+    "operations": [
+      {
+        "operationId": "op-buffer-held",
+        "code": "OK",
+        "delivery": "ACCEPTED",
+        "attemptCount": 1,
+        "completionRoute": "OPERATION_EXECUTION",
+        "sideEffects": {
+          "permitAcquires": 1,
+          "permitRejects": 0,
+          "permitReleases": 1,
+          "observerStarts": 1,
+          "configurationSnapshots": 1,
+          "credentialResolutions": 1,
+          "defaultSnapshots": 1,
+          "idempotencyGenerations": 0,
+          "serializations": 1,
+          "networkAttempts": 1,
+          "byteAcquires": 3,
+          "byteRejects": 0,
+          "byteReleases": 3,
+          "deadlineCallbacks": 0,
+          "terminalDispatches": 0,
+          "ghostWorkAttempts": 0,
+          "reservationAcquires": 1,
+          "reservationReleases": 1
+        }
+      },
+      {
+        "operationId": "op-buffer-overflow",
+        "code": "OVERLOADED",
+        "delivery": "NOT_SENT",
+        "attemptCount": 0,
+        "completionRoute": "OPERATION_EXECUTION",
+        "sideEffects": {
+          "permitAcquires": 1,
+          "permitRejects": 0,
+          "permitReleases": 1,
+          "observerStarts": 0,
+          "configurationSnapshots": 0,
+          "credentialResolutions": 0,
+          "defaultSnapshots": 0,
+          "idempotencyGenerations": 0,
+          "serializations": 0,
+          "networkAttempts": 0,
+          "byteAcquires": 0,
+          "byteRejects": 1,
+          "byteReleases": 0,
+          "deadlineCallbacks": 0,
+          "terminalDispatches": 0,
+          "ghostWorkAttempts": 0,
+          "reservationAcquires": 1,
+          "reservationReleases": 1
+        }
+      },
+      {
+        "operationId": "op-buffer-probe",
+        "code": "OK",
+        "delivery": "ACCEPTED",
+        "attemptCount": 1,
+        "completionRoute": "OPERATION_EXECUTION",
+        "sideEffects": {
+          "permitAcquires": 1,
+          "permitRejects": 0,
+          "permitReleases": 1,
+          "observerStarts": 1,
+          "configurationSnapshots": 1,
+          "credentialResolutions": 1,
+          "defaultSnapshots": 1,
+          "idempotencyGenerations": 0,
+          "serializations": 1,
+          "networkAttempts": 1,
+          "byteAcquires": 3,
+          "byteRejects": 0,
+          "byteReleases": 3,
+          "deadlineCallbacks": 0,
+          "terminalDispatches": 0,
+          "ghostWorkAttempts": 0,
+          "reservationAcquires": 1,
+          "reservationReleases": 1
+        }
+      }
+    ],
+    "finalRuntime": {
+      "state": "OPEN",
+      "inFlight": 0,
+      "maxObservedInFlight": 2,
+      "completionReservations": 0,
+      "maxObservedCompletionReservations": 2,
+      "activeTerminalOperation": null,
+      "queuedTerminalTasks": 0,
+      "currentBufferedBytes": 0,
+      "maxObservedBufferedBytes": 2359296,
+      "queuedWaiters": 0,
+      "totalPermitAcquires": 3,
+      "totalPermitRejects": 0,
+      "totalPermitReleases": 3,
+      "totalReservationAcquires": 3,
+      "totalReservationReleases": 3,
+      "totalByteAcquires": 6,
+      "totalByteRejects": 1,
+      "totalByteReleases": 6,
+      "deadlineCallbacks": 0,
+      "terminalDispatches": 0,
+      "ghostWorkAttempts": 0,
+      "diagnostics": {
+        "inFlightOperations": 0,
+        "bufferedBytes": 0,
+        "concurrencyOverloadRejections": 0,
+        "requestByteOverloadRejections": 1,
+        "responseByteOverloadRejections": 0,
+        "responseHeaderLimitFailures": 0,
+        "executorOverloadRejections": 0,
+        "schedulerOverloadRejections": 0,
+        "responseCloseFailures": 0,
+        "droppedObserverEvents": 0,
+        "observerFailures": 0,
+        "closed": false
+      }
+    }
+  }
+}

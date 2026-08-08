@@ -1,0 +1,133 @@
+{
+  "caseId": "commitment-one-subscription-zero-demand-not-sent",
+  "category": "commitment",
+  "executionMode": "commitment-probe-seam",
+  "description": "The production commitment tracker derives NOT_SENT from 1 publisher subscription and 0 demand signal.",
+  "input": {
+    "profile": "valid"
+  },
+  "options": {
+    "maxAttempts": 1,
+    "idempotencyKey": "idem_1_0_probe"
+  },
+  "script": [
+    {
+      "actor": "fixture",
+      "action": "failConnection",
+      "attempt": 1,
+      "phase": "beforeRequestBytes",
+      "kind": "io",
+      "bodySubscriptions": 1,
+      "bodyDemands": 0
+    },
+    {
+      "actor": "runner",
+      "action": "drainRuntimeDiagnostics"
+    }
+  ],
+  "expected": {
+    "configurationTrace": [
+      "credential:REPOST_SEND_API_KEY",
+      "base-url:default",
+      "endpoint-path:/v1/messages",
+      "redirects:false",
+      "snapshot:1"
+    ],
+    "attemptTrace": [
+      "attempt:1:start@0",
+      "attempt:1:end:io@0"
+    ],
+    "commitTrace": [
+      "attempt:1:NOT_SENT@0"
+    ],
+    "scheduleTrace": [],
+    "sideEffectTrace": [
+      "permit.acquire",
+      "configuration.snapshot",
+      "credentials.snapshot",
+      "defaults.snapshot",
+      "idempotency.generate:0",
+      "serialize:1",
+      "network:1",
+      "permit.release"
+    ],
+    "errorTrace": [
+      "terminal:IO:NOT_SENT"
+    ],
+    "error": {
+      "code": "IO",
+      "delivery": "NOT_SENT",
+      "attemptCount": 1,
+      "httpStatus": null,
+      "retryable": true,
+      "compressedBytes": 0,
+      "decompressedBytes": 0,
+      "truncated": false,
+      "idempotencyKey": "idem_1_0_probe",
+      "message": "Transport I/O failed",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": "op-0001",
+      "failureReason": "UNKNOWN",
+      "remediationKey": "network.unknown",
+      "causeCategory": "HTTP_RUNTIME",
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [],
+      "configurationIssues": [],
+      "issueCount": 0,
+      "issuesTruncated": false
+    },
+    "legacyBody": {
+      "code": "IO",
+      "message": "Transport I/O failed",
+      "truncated": false
+    },
+    "delivery": "NOT_SENT",
+    "byteTrace": [],
+    "redactionTrace": [],
+    "fixtureTrace": [
+      "fixture:attempt:1:failure:io",
+      "fixture:attempt:1:body-subscriptions:1:body-demands:0"
+    ],
+    "result": null,
+    "observerCallbackTrace": [],
+    "primarySurface": "sendOperation",
+    "completionRoute": "OPERATION_EXECUTION",
+    "runtimeDiagnostics": {
+      "inFlightOperations": 0,
+      "bufferedBytes": 0,
+      "concurrencyOverloadRejections": 0,
+      "requestByteOverloadRejections": 0,
+      "responseByteOverloadRejections": 0,
+      "responseHeaderLimitFailures": 0,
+      "executorOverloadRejections": 0,
+      "schedulerOverloadRejections": 0,
+      "responseCloseFailures": 0,
+      "droppedObserverEvents": 0,
+      "observerFailures": 0,
+      "closed": false
+    },
+    "outcomeEvidence": {
+      "operationId": "op-0001",
+      "primaryKind": "structured-error",
+      "nativeCancelled": false,
+      "settlements": 1,
+      "code": "IO",
+      "delivery": "NOT_SENT",
+      "attemptCount": 1,
+      "httpStatus": null,
+      "idempotencyKey": "idem_1_0_probe",
+      "noGhostWork": true,
+      "failureReason": "UNKNOWN",
+      "remediationKey": "network.unknown",
+      "causeCategory": "HTTP_RUNTIME"
+    },
+    "observerEmissionTrace": [
+      "operation.start|operationId=op-0001",
+      "attempt.start|operationId=op-0001|attempt=1",
+      "attempt.end|operationId=op-0001|attempt=1|durationMs=0|outcome=io|code=IO|failureReason=UNKNOWN|delivery=NOT_SENT|statusClass=none",
+      "operation.end|operationId=op-0001|durationMs=0|outcome=failed|code=IO|failureReason=UNKNOWN|delivery=NOT_SENT|attempts=1"
+    ]
+  }
+}

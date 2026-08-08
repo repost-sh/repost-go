@@ -1,0 +1,148 @@
+{
+  "caseId": "response-content-encoding-duplicate-conflicting-rejected",
+  "category": "response",
+  "executionMode": "production-http-fixture",
+  "description": "Case-variant duplicate Content-Encoding fields are rejected when their values conflict.",
+  "input": {
+    "profile": "valid"
+  },
+  "options": {
+    "baseUrl": "$fixtureBaseUrl",
+    "maxAttempts": 4,
+    "idempotencyKey": "idem_content_encoding_duplicate_conflicting"
+  },
+  "script": [
+    {
+      "actor": "fixture",
+      "action": "respond",
+      "attempt": 1,
+      "status": 202,
+      "headers": {
+        "content-type": "application/json",
+        "content-encoding": "gzip",
+        "CONTENT-ENCODING": "identity"
+      },
+      "body": {
+        "asset": "validGzip"
+      }
+    },
+    {
+      "actor": "runner",
+      "action": "drainRuntimeDiagnostics"
+    }
+  ],
+  "expected": {
+    "configurationTrace": [
+      "credential:REPOST_SEND_API_KEY",
+      "base-url:baseUrl",
+      "endpoint-path:/v1/messages",
+      "redirects:false",
+      "snapshot:1"
+    ],
+    "attemptTrace": [
+      "attempt:1:start@0",
+      "attempt:1:commit@0",
+      "attempt:1:response:202@0",
+      "attempt:1:end:response-protocol@0"
+    ],
+    "commitTrace": [
+      "attempt:1:NOT_SENT@0",
+      "attempt:1:POSSIBLY_SENT@0",
+      "operation:POSSIBLY_SENT@0"
+    ],
+    "scheduleTrace": [],
+    "sideEffectTrace": [
+      "permit.acquire",
+      "configuration.snapshot",
+      "credentials.snapshot",
+      "defaults.snapshot",
+      "idempotency.generate:0",
+      "serialize:1",
+      "network:1",
+      "response.cancel",
+      "permit.release"
+    ],
+    "errorTrace": [
+      "terminal:RESPONSE_PROTOCOL:POSSIBLY_SENT"
+    ],
+    "error": {
+      "code": "RESPONSE_PROTOCOL",
+      "delivery": "POSSIBLY_SENT",
+      "attemptCount": 1,
+      "httpStatus": 202,
+      "retryable": false,
+      "compressedBytes": 0,
+      "decompressedBytes": 0,
+      "truncated": false,
+      "idempotencyKey": "idem_content_encoding_duplicate_conflicting",
+      "message": "Response protocol is invalid",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": "op-0001",
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [],
+      "configurationIssues": [],
+      "issueCount": 0,
+      "issuesTruncated": false,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "delivery": "POSSIBLY_SENT",
+    "byteTrace": [
+      "response-wire:0:cancelled",
+      "response-decoded:0:cancelled"
+    ],
+    "redactionTrace": [],
+    "fixtureTrace": [
+      "fixture:attempt:1:accepted",
+      "fixture:attempt:1:idempotency:idem_content_encoding_duplicate_conflicting",
+      "fixture:attempt:1:response-cancelled:0"
+    ],
+    "result": null,
+    "legacyBody": {
+      "code": "RESPONSE_PROTOCOL",
+      "message": "Response protocol is invalid",
+      "truncated": false
+    },
+    "outcomeEvidence": {
+      "operationId": "op-0001",
+      "primaryKind": "structured-error",
+      "nativeCancelled": false,
+      "settlements": 1,
+      "code": "RESPONSE_PROTOCOL",
+      "delivery": "POSSIBLY_SENT",
+      "attemptCount": 1,
+      "httpStatus": 202,
+      "idempotencyKey": "idem_content_encoding_duplicate_conflicting",
+      "noGhostWork": true,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "primarySurface": "sendOperation",
+    "runtimeDiagnostics": {
+      "inFlightOperations": 0,
+      "bufferedBytes": 0,
+      "concurrencyOverloadRejections": 0,
+      "requestByteOverloadRejections": 0,
+      "responseByteOverloadRejections": 0,
+      "responseHeaderLimitFailures": 0,
+      "executorOverloadRejections": 0,
+      "schedulerOverloadRejections": 0,
+      "responseCloseFailures": 0,
+      "droppedObserverEvents": 0,
+      "observerFailures": 0,
+      "closed": false
+    },
+    "completionRoute": "OPERATION_EXECUTION",
+    "observerCallbackTrace": [],
+    "observerEmissionTrace": [
+      "operation.start|operationId=op-0001",
+      "attempt.start|operationId=op-0001|attempt=1",
+      "attempt.end|operationId=op-0001|attempt=1|durationMs=0|outcome=response-protocol|code=RESPONSE_PROTOCOL|failureReason=NONE|delivery=POSSIBLY_SENT|statusClass=2xx",
+      "operation.end|operationId=op-0001|durationMs=0|outcome=failed|code=RESPONSE_PROTOCOL|failureReason=NONE|delivery=POSSIBLY_SENT|attempts=1"
+    ]
+  }
+}

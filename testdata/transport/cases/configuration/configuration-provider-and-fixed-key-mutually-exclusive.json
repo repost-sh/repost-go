@@ -1,0 +1,83 @@
+{
+  "caseId": "configuration-provider-and-fixed-key-mutually-exclusive",
+  "category": "configuration",
+  "description": "Supplying both provider and fixed-key options is rejected before either credential is read. Fixed client options are validated during build/runtime construction (snapshot0).",
+  "input": {
+    "profile": "valid",
+    "providerValues": [
+      "provider-key"
+    ]
+  },
+  "options": {
+    "apiKeyProvider": true,
+    "apiKey": "explicit-key"
+  },
+  "script": [],
+  "expected": {
+    "configurationTrace": [
+      "snapshot:0"
+    ],
+    "attemptTrace": [],
+    "commitTrace": [],
+    "scheduleTrace": [],
+    "sideEffectTrace": [],
+    "errorTrace": [
+      "terminal:CONFIGURATION:NOT_SENT"
+    ],
+    "error": {
+      "code": "CONFIGURATION",
+      "delivery": "NOT_SENT",
+      "attemptCount": 0,
+      "httpStatus": null,
+      "retryable": false,
+      "compressedBytes": 0,
+      "decompressedBytes": 0,
+      "truncated": false,
+      "idempotencyKey": null,
+      "message": "Invalid transport configuration",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": null,
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [],
+      "configurationIssues": [
+        {
+          "code": "CONFLICT",
+          "optionKeys": [
+            "API_KEY",
+            "API_KEY_PROVIDER"
+          ]
+        }
+      ],
+      "issueCount": 1,
+      "issuesTruncated": false,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "delivery": "NOT_SENT",
+    "byteTrace": [],
+    "redactionTrace": [],
+    "fixtureTrace": [],
+    "result": null,
+    "legacyBody": {
+      "code": "CONFIGURATION",
+      "message": "Invalid transport configuration",
+      "truncated": false
+    },
+    "primarySurface": "constructionThrow",
+    "completionRoute": null,
+    "observerCallbackTrace": [],
+    "constructionEvidence": {
+      "code": "CONFIGURATION",
+      "message": "Invalid transport configuration",
+      "operationId": null,
+      "idempotencyKey": null,
+      "admitted": false,
+      "settlements": 0,
+      "causeCategory": null
+    },
+    "observerEmissionTrace": []
+  }
+}

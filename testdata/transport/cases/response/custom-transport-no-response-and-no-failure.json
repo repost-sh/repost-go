@@ -1,0 +1,138 @@
+{
+  "caseId": "custom-transport-no-response-and-no-failure",
+  "category": "response",
+  "executionMode": "custom-one-attempt",
+  "description": "A custom transport synchronous/null/failed asynchronous seam is sanitized as IO/UNKNOWN with no fabricated response object, status, or response ownership.",
+  "input": {
+    "profile": "valid"
+  },
+  "options": {
+    "transportMode": "custom",
+    "maxAttempts": 4,
+    "idempotencyKey": "idem_custom_transport_no_response_and_no_failure"
+  },
+  "script": [
+    {
+      "actor": "fixture",
+      "action": "failConnection",
+      "attempt": 1,
+      "phase": "beforeRequestBytes",
+      "kind": "io",
+      "commitState": "UNKNOWN",
+      "customException": true,
+      "seamFailure": "no-response-and-no-failure"
+    },
+    {
+      "actor": "runner",
+      "action": "drainRuntimeDiagnostics"
+    }
+  ],
+  "expected": {
+    "configurationTrace": [
+      "credential:REPOST_SEND_API_KEY",
+      "base-url:default",
+      "endpoint-path:/v1/messages",
+      "redirects:false",
+      "snapshot:1"
+    ],
+    "attemptTrace": [
+      "attempt:1:start@0",
+      "attempt:1:commit@0",
+      "attempt:1:end:io@0"
+    ],
+    "commitTrace": [
+      "attempt:1:NOT_SENT@0",
+      "attempt:1:POSSIBLY_SENT@0",
+      "operation:POSSIBLY_SENT@0"
+    ],
+    "scheduleTrace": [],
+    "sideEffectTrace": [
+      "permit.acquire",
+      "configuration.snapshot",
+      "credentials.snapshot",
+      "defaults.snapshot",
+      "idempotency.generate:0",
+      "serialize:1",
+      "network:1",
+      "permit.release"
+    ],
+    "errorTrace": [
+      "terminal:IO:POSSIBLY_SENT"
+    ],
+    "error": {
+      "code": "IO",
+      "delivery": "POSSIBLY_SENT",
+      "attemptCount": 1,
+      "httpStatus": null,
+      "retryable": false,
+      "compressedBytes": 0,
+      "decompressedBytes": 0,
+      "truncated": false,
+      "idempotencyKey": "idem_custom_transport_no_response_and_no_failure",
+      "message": "Transport I/O failed",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": "op-0001",
+      "failureReason": "UNKNOWN",
+      "remediationKey": "network.unknown",
+      "causeCategory": "CUSTOM_TRANSPORT",
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [],
+      "configurationIssues": [],
+      "issueCount": 0,
+      "issuesTruncated": false
+    },
+    "legacyBody": {
+      "code": "IO",
+      "message": "Transport I/O failed",
+      "truncated": false
+    },
+    "delivery": "POSSIBLY_SENT",
+    "byteTrace": [],
+    "redactionTrace": [],
+    "fixtureTrace": [
+      "fixture:attempt:1:failure:io",
+      "fixture:attempt:1:seam-failure:no-response-and-no-failure:none"
+    ],
+    "result": null,
+    "observerCallbackTrace": [],
+    "primarySurface": "sendOperation",
+    "completionRoute": "OPERATION_EXECUTION",
+    "runtimeDiagnostics": {
+      "inFlightOperations": 0,
+      "bufferedBytes": 0,
+      "concurrencyOverloadRejections": 0,
+      "requestByteOverloadRejections": 0,
+      "responseByteOverloadRejections": 0,
+      "responseHeaderLimitFailures": 0,
+      "executorOverloadRejections": 0,
+      "schedulerOverloadRejections": 0,
+      "responseCloseFailures": 0,
+      "droppedObserverEvents": 0,
+      "observerFailures": 0,
+      "closed": false
+    },
+    "outcomeEvidence": {
+      "operationId": "op-0001",
+      "primaryKind": "structured-error",
+      "nativeCancelled": false,
+      "settlements": 1,
+      "code": "IO",
+      "delivery": "POSSIBLY_SENT",
+      "attemptCount": 1,
+      "httpStatus": null,
+      "idempotencyKey": "idem_custom_transport_no_response_and_no_failure",
+      "noGhostWork": true,
+      "failureReason": "UNKNOWN",
+      "remediationKey": "network.unknown",
+      "causeCategory": "CUSTOM_TRANSPORT"
+    },
+    "observerEmissionTrace": [
+      "operation.start|operationId=op-0001",
+      "attempt.start|operationId=op-0001|attempt=1",
+      "attempt.end|operationId=op-0001|attempt=1|durationMs=0|outcome=io|code=IO|failureReason=UNKNOWN|delivery=POSSIBLY_SENT|statusClass=none",
+      "operation.end|operationId=op-0001|durationMs=0|outcome=failed|code=IO|failureReason=UNKNOWN|delivery=POSSIBLY_SENT|attempts=1"
+    ]
+  }
+}

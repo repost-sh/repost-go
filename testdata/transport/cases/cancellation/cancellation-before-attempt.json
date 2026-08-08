@@ -1,0 +1,118 @@
+{
+  "caseId": "cancellation-before-attempt",
+  "category": "cancellation",
+  "description": "Cancellation after preparation but before the first attempt is NOT_SENT.",
+  "input": {
+    "profile": "valid"
+  },
+  "options": {
+    "idempotencyKey": "idem_cancel",
+    "maxAttempts": 4
+  },
+  "script": [
+    {
+      "actor": "runner",
+      "action": "cancelSend",
+      "phase": "beforeAttempt"
+    },
+    {
+      "actor": "runner",
+      "action": "drainRuntimeDiagnostics"
+    }
+  ],
+  "expected": {
+    "configurationTrace": [
+      "credential:REPOST_SEND_API_KEY",
+      "base-url:default",
+      "endpoint-path:/v1/messages",
+      "redirects:false",
+      "snapshot:1"
+    ],
+    "attemptTrace": [],
+    "commitTrace": [],
+    "scheduleTrace": [],
+    "sideEffectTrace": [
+      "permit.acquire",
+      "configuration.snapshot",
+      "credentials.snapshot",
+      "defaults.snapshot",
+      "idempotency.generate:0",
+      "serialize:1",
+      "permit.release"
+    ],
+    "errorTrace": [
+      "terminal:CANCELLED:NOT_SENT"
+    ],
+    "error": {
+      "code": "CANCELLED",
+      "delivery": "NOT_SENT",
+      "attemptCount": 0,
+      "httpStatus": null,
+      "retryable": false,
+      "compressedBytes": 0,
+      "decompressedBytes": 0,
+      "truncated": false,
+      "idempotencyKey": "idem_cancel",
+      "message": "Operation cancelled",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": "op-0001",
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [],
+      "configurationIssues": [],
+      "issueCount": 0,
+      "issuesTruncated": false,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "delivery": "NOT_SENT",
+    "byteTrace": [],
+    "redactionTrace": [],
+    "fixtureTrace": [],
+    "result": null,
+    "legacyBody": {
+      "code": "CANCELLED",
+      "message": "Operation cancelled",
+      "truncated": false
+    },
+    "outcomeEvidence": {
+      "operationId": "op-0001",
+      "primaryKind": "native-cancel",
+      "nativeCancelled": true,
+      "settlements": 1,
+      "code": "CANCELLED",
+      "delivery": "NOT_SENT",
+      "attemptCount": 0,
+      "httpStatus": null,
+      "idempotencyKey": "idem_cancel",
+      "noGhostWork": true,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "primarySurface": "sendOperation",
+    "runtimeDiagnostics": {
+      "inFlightOperations": 0,
+      "bufferedBytes": 0,
+      "concurrencyOverloadRejections": 0,
+      "requestByteOverloadRejections": 0,
+      "responseByteOverloadRejections": 0,
+      "responseHeaderLimitFailures": 0,
+      "executorOverloadRejections": 0,
+      "schedulerOverloadRejections": 0,
+      "responseCloseFailures": 0,
+      "droppedObserverEvents": 0,
+      "observerFailures": 0,
+      "closed": false
+    },
+    "completionRoute": "NATIVE_CANCEL",
+    "observerCallbackTrace": [],
+    "observerEmissionTrace": [
+      "operation.start|operationId=op-0001",
+      "operation.cancel|operationId=op-0001|delivery=NOT_SENT",
+      "operation.end|operationId=op-0001|durationMs=0|outcome=cancelled|code=CANCELLED|failureReason=NONE|delivery=NOT_SENT|attempts=0"
+    ]
+  }
+}

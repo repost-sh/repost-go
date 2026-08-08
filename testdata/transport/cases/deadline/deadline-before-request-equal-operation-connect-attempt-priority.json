@@ -1,0 +1,138 @@
+{
+  "caseId": "deadline-before-request-equal-operation-connect-attempt-priority",
+  "category": "deadline",
+  "description": "At exact equality before request bytes, OPERATION_DEADLINE wins over CONNECT and ATTEMPT_TIMEOUT regardless of callback order.",
+  "input": {
+    "profile": "valid"
+  },
+  "options": {
+    "connectTimeoutMs": 1000,
+    "attemptTimeoutMs": 1000,
+    "operationTimeoutMs": 1000,
+    "maxAttempts": 1,
+    "idempotencyKey": "idem_equal_all_deadlines"
+  },
+  "script": [
+    {
+      "actor": "fixture",
+      "action": "hold",
+      "attempt": 1,
+      "phase": "beforeRequestBytes",
+      "barrier": "equal-all"
+    },
+    {
+      "actor": "runner",
+      "action": "advanceTime",
+      "byMs": 1000
+    },
+    {
+      "actor": "runner",
+      "action": "drainRuntimeDiagnostics"
+    }
+  ],
+  "expected": {
+    "configurationTrace": [
+      "credential:REPOST_SEND_API_KEY",
+      "base-url:default",
+      "endpoint-path:/v1/messages",
+      "redirects:false",
+      "snapshot:1"
+    ],
+    "attemptTrace": [
+      "attempt:1:start@0",
+      "attempt:1:end:operation-deadline@1000"
+    ],
+    "commitTrace": [
+      "attempt:1:NOT_SENT@0"
+    ],
+    "scheduleTrace": [],
+    "sideEffectTrace": [
+      "permit.acquire",
+      "configuration.snapshot",
+      "credentials.snapshot",
+      "defaults.snapshot",
+      "idempotency.generate:0",
+      "serialize:1",
+      "network:1",
+      "permit.release"
+    ],
+    "errorTrace": [
+      "terminal:OPERATION_DEADLINE:NOT_SENT"
+    ],
+    "error": {
+      "code": "OPERATION_DEADLINE",
+      "delivery": "NOT_SENT",
+      "attemptCount": 1,
+      "httpStatus": null,
+      "retryable": false,
+      "compressedBytes": 0,
+      "decompressedBytes": 0,
+      "truncated": false,
+      "idempotencyKey": "idem_equal_all_deadlines",
+      "message": "Operation deadline exceeded",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": "op-0001",
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null,
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [],
+      "configurationIssues": [],
+      "issueCount": 0,
+      "issuesTruncated": false
+    },
+    "legacyBody": {
+      "code": "OPERATION_DEADLINE",
+      "message": "Operation deadline exceeded",
+      "truncated": false
+    },
+    "delivery": "NOT_SENT",
+    "byteTrace": [],
+    "redactionTrace": [],
+    "fixtureTrace": [
+      "fixture:attempt:1:accepted",
+      "fixture:attempt:1:idempotency:idem_equal_all_deadlines"
+    ],
+    "result": null,
+    "observerCallbackTrace": [],
+    "primarySurface": "sendOperation",
+    "completionRoute": "TERMINAL_DISPATCHER",
+    "runtimeDiagnostics": {
+      "inFlightOperations": 0,
+      "bufferedBytes": 0,
+      "concurrencyOverloadRejections": 0,
+      "requestByteOverloadRejections": 0,
+      "responseByteOverloadRejections": 0,
+      "responseHeaderLimitFailures": 0,
+      "executorOverloadRejections": 0,
+      "schedulerOverloadRejections": 0,
+      "responseCloseFailures": 0,
+      "droppedObserverEvents": 0,
+      "observerFailures": 0,
+      "closed": false
+    },
+    "outcomeEvidence": {
+      "operationId": "op-0001",
+      "primaryKind": "structured-error",
+      "nativeCancelled": false,
+      "settlements": 1,
+      "code": "OPERATION_DEADLINE",
+      "delivery": "NOT_SENT",
+      "attemptCount": 1,
+      "httpStatus": null,
+      "idempotencyKey": "idem_equal_all_deadlines",
+      "noGhostWork": true,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "observerEmissionTrace": [
+      "operation.start|operationId=op-0001",
+      "attempt.start|operationId=op-0001|attempt=1",
+      "attempt.end|operationId=op-0001|attempt=1|durationMs=1000|outcome=operation-deadline|code=OPERATION_DEADLINE|failureReason=NONE|delivery=NOT_SENT|statusClass=none",
+      "operation.end|operationId=op-0001|durationMs=1000|outcome=failed|code=OPERATION_DEADLINE|failureReason=NONE|delivery=NOT_SENT|attempts=1"
+    ]
+  }
+}

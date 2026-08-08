@@ -1,0 +1,154 @@
+{
+  "scenarioId": "concurrency-reject-after-close",
+  "description": "A send started after production runtime close is rejected as CLOSED/NOT_SENT before permit acquisition, observers, configuration, credentials, defaults, idempotency, serialization, or network.",
+  "runtime": {
+    "maxInFlight": 1,
+    "maxBufferedBytes": 33554432
+  },
+  "operations": [
+    {
+      "operationId": "op-after-close",
+      "input": {
+        "profile": "valid"
+      },
+      "options": {},
+      "fixtureScript": [
+        {
+          "action": "respond",
+          "attempt": 1,
+          "status": 202,
+          "bodyKind": "valid",
+          "responseBytes": 104
+        }
+      ],
+      "requestBytes": 104
+    }
+  ],
+  "steps": [
+    {
+      "action": "closeRuntime"
+    },
+    {
+      "action": "start",
+      "operationId": "op-after-close"
+    },
+    {
+      "action": "awaitTerminal",
+      "operationId": "op-after-close"
+    },
+    {
+      "action": "checkpoint",
+      "name": "closed-rejection"
+    }
+  ],
+  "expected": {
+    "orderedTrace": [
+      "runtime:close.begin:inFlight=0",
+      "runtime:close.end:inFlight=0",
+      "operation:op-after-close:admission.closed:inFlight=0",
+      "operation:op-after-close:terminal:CLOSED:NOT_SENT:attempts=0",
+      "checkpoint:closed-rejection:state=CLOSED:inFlight=0:queuedWaiters=0"
+    ],
+    "checkpoints": [
+      {
+        "name": "closed-rejection",
+        "state": "CLOSED",
+        "inFlight": 0,
+        "completionReservations": 0,
+        "activeTerminalOperation": null,
+        "queuedTerminalTasks": 0,
+        "currentBufferedBytes": 0,
+        "queuedWaiters": 0,
+        "totalPermitAcquires": 0,
+        "totalPermitRejects": 0,
+        "totalPermitReleases": 0,
+        "totalByteAcquires": 0,
+        "totalByteRejects": 0,
+        "totalByteReleases": 0,
+        "deadlineCallbacks": 0,
+        "terminalDispatches": 0,
+        "ghostWorkAttempts": 0,
+        "diagnostics": {
+          "inFlightOperations": 0,
+          "bufferedBytes": 0,
+          "concurrencyOverloadRejections": 0,
+          "requestByteOverloadRejections": 0,
+          "responseByteOverloadRejections": 0,
+          "responseHeaderLimitFailures": 0,
+          "executorOverloadRejections": 0,
+          "schedulerOverloadRejections": 0,
+          "responseCloseFailures": 0,
+          "droppedObserverEvents": 0,
+          "observerFailures": 0,
+          "closed": true
+        }
+      }
+    ],
+    "operations": [
+      {
+        "operationId": "op-after-close",
+        "code": "CLOSED",
+        "delivery": "NOT_SENT",
+        "attemptCount": 0,
+        "completionRoute": "DIRECT_PRE_ADMISSION",
+        "sideEffects": {
+          "permitAcquires": 0,
+          "permitRejects": 0,
+          "permitReleases": 0,
+          "observerStarts": 0,
+          "configurationSnapshots": 0,
+          "credentialResolutions": 0,
+          "defaultSnapshots": 0,
+          "idempotencyGenerations": 0,
+          "serializations": 0,
+          "networkAttempts": 0,
+          "byteAcquires": 0,
+          "byteRejects": 0,
+          "byteReleases": 0,
+          "deadlineCallbacks": 0,
+          "terminalDispatches": 0,
+          "ghostWorkAttempts": 0,
+          "reservationAcquires": 0,
+          "reservationReleases": 0
+        }
+      }
+    ],
+    "finalRuntime": {
+      "state": "CLOSED",
+      "inFlight": 0,
+      "maxObservedInFlight": 0,
+      "completionReservations": 0,
+      "maxObservedCompletionReservations": 0,
+      "activeTerminalOperation": null,
+      "queuedTerminalTasks": 0,
+      "currentBufferedBytes": 0,
+      "maxObservedBufferedBytes": 0,
+      "queuedWaiters": 0,
+      "totalPermitAcquires": 0,
+      "totalPermitRejects": 0,
+      "totalPermitReleases": 0,
+      "totalReservationAcquires": 0,
+      "totalReservationReleases": 0,
+      "totalByteAcquires": 0,
+      "totalByteRejects": 0,
+      "totalByteReleases": 0,
+      "deadlineCallbacks": 0,
+      "terminalDispatches": 0,
+      "ghostWorkAttempts": 0,
+      "diagnostics": {
+        "inFlightOperations": 0,
+        "bufferedBytes": 0,
+        "concurrencyOverloadRejections": 0,
+        "requestByteOverloadRejections": 0,
+        "responseByteOverloadRejections": 0,
+        "responseHeaderLimitFailures": 0,
+        "executorOverloadRejections": 0,
+        "schedulerOverloadRejections": 0,
+        "responseCloseFailures": 0,
+        "droppedObserverEvents": 0,
+        "observerFailures": 0,
+        "closed": true
+      }
+    }
+  }
+}

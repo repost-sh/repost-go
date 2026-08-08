@@ -1,0 +1,269 @@
+{
+  "scenarioId": "concurrency-retry-holds-one-permit",
+  "description": "A retrying operation retains one production permit throughout backoff; an overlapping send is rejected and the retry never reacquires or double releases.",
+  "runtime": {
+    "maxInFlight": 1,
+    "maxBufferedBytes": 33554432
+  },
+  "operations": [
+    {
+      "operationId": "op-retry",
+      "input": {
+        "profile": "valid",
+        "entropy": [
+          0
+        ]
+      },
+      "options": {
+        "idempotencyKey": "idem_retry",
+        "maxAttempts": 2
+      },
+      "fixtureScript": [
+        {
+          "action": "failConnection",
+          "attempt": 1,
+          "phase": "beforeRequestBytes",
+          "kind": "dns"
+        },
+        {
+          "action": "respond",
+          "attempt": 2,
+          "status": 202,
+          "bodyKind": "valid",
+          "responseBytes": 104
+        }
+      ],
+      "requestBytes": 104
+    },
+    {
+      "operationId": "op-overflow",
+      "input": {
+        "profile": "valid"
+      },
+      "options": {},
+      "fixtureScript": [
+        {
+          "action": "respond",
+          "attempt": 1,
+          "status": 202,
+          "bodyKind": "valid",
+          "responseBytes": 104
+        }
+      ],
+      "requestBytes": 104
+    }
+  ],
+  "steps": [
+    {
+      "action": "start",
+      "operationId": "op-retry"
+    },
+    {
+      "action": "awaitRetryScheduled",
+      "operationId": "op-retry",
+      "retryIndex": 1
+    },
+    {
+      "action": "checkpoint",
+      "name": "backoff-held"
+    },
+    {
+      "action": "start",
+      "operationId": "op-overflow"
+    },
+    {
+      "action": "awaitTerminal",
+      "operationId": "op-overflow"
+    },
+    {
+      "action": "advanceTime",
+      "byMs": 0
+    },
+    {
+      "action": "awaitTerminal",
+      "operationId": "op-retry"
+    },
+    {
+      "action": "checkpoint",
+      "name": "retry-drained"
+    }
+  ],
+  "expected": {
+    "orderedTrace": [
+      "operation:op-retry:permit.acquire:inFlight=1",
+      "operation:op-retry:reservation.acquire:reserved=1",
+      "operation:op-retry:observer.start",
+      "operation:op-retry:retry.schedule:index=1:delayMs=0:inFlight=1",
+      "checkpoint:backoff-held:state=OPEN:inFlight=1:queuedWaiters=0",
+      "operation:op-overflow:permit.reject:inFlight=1",
+      "operation:op-overflow:terminal:OVERLOADED:NOT_SENT:attempts=0",
+      "operation:op-retry:permit.release:inFlight=0",
+      "operation:op-retry:primary.complete:OK:ACCEPTED",
+      "operation:op-retry:outcome.complete:OK:ACCEPTED",
+      "operation:op-retry:reservation.release:reserved=0",
+      "operation:op-retry:terminal:OK:ACCEPTED:attempts=2",
+      "checkpoint:retry-drained:state=OPEN:inFlight=0:queuedWaiters=0"
+    ],
+    "checkpoints": [
+      {
+        "name": "backoff-held",
+        "state": "OPEN",
+        "inFlight": 1,
+        "completionReservations": 1,
+        "activeTerminalOperation": null,
+        "queuedTerminalTasks": 0,
+        "currentBufferedBytes": 1310824,
+        "queuedWaiters": 0,
+        "totalPermitAcquires": 1,
+        "totalPermitRejects": 0,
+        "totalPermitReleases": 0,
+        "totalByteAcquires": 3,
+        "totalByteRejects": 0,
+        "totalByteReleases": 0,
+        "deadlineCallbacks": 0,
+        "terminalDispatches": 0,
+        "ghostWorkAttempts": 0,
+        "diagnostics": {
+          "inFlightOperations": 1,
+          "bufferedBytes": 1310824,
+          "concurrencyOverloadRejections": 0,
+          "requestByteOverloadRejections": 0,
+          "responseByteOverloadRejections": 0,
+          "responseHeaderLimitFailures": 0,
+          "executorOverloadRejections": 0,
+          "schedulerOverloadRejections": 0,
+          "responseCloseFailures": 0,
+          "droppedObserverEvents": 0,
+          "observerFailures": 0,
+          "closed": false
+        }
+      },
+      {
+        "name": "retry-drained",
+        "state": "OPEN",
+        "inFlight": 0,
+        "completionReservations": 0,
+        "activeTerminalOperation": null,
+        "queuedTerminalTasks": 0,
+        "currentBufferedBytes": 0,
+        "queuedWaiters": 0,
+        "totalPermitAcquires": 1,
+        "totalPermitRejects": 1,
+        "totalPermitReleases": 1,
+        "totalByteAcquires": 3,
+        "totalByteRejects": 0,
+        "totalByteReleases": 3,
+        "deadlineCallbacks": 0,
+        "terminalDispatches": 0,
+        "ghostWorkAttempts": 0,
+        "diagnostics": {
+          "inFlightOperations": 0,
+          "bufferedBytes": 0,
+          "concurrencyOverloadRejections": 1,
+          "requestByteOverloadRejections": 0,
+          "responseByteOverloadRejections": 0,
+          "responseHeaderLimitFailures": 0,
+          "executorOverloadRejections": 0,
+          "schedulerOverloadRejections": 0,
+          "responseCloseFailures": 0,
+          "droppedObserverEvents": 0,
+          "observerFailures": 0,
+          "closed": false
+        }
+      }
+    ],
+    "operations": [
+      {
+        "operationId": "op-retry",
+        "code": "OK",
+        "delivery": "ACCEPTED",
+        "attemptCount": 2,
+        "completionRoute": "OPERATION_EXECUTION",
+        "sideEffects": {
+          "permitAcquires": 1,
+          "permitRejects": 0,
+          "permitReleases": 1,
+          "observerStarts": 1,
+          "configurationSnapshots": 1,
+          "credentialResolutions": 1,
+          "defaultSnapshots": 1,
+          "idempotencyGenerations": 0,
+          "serializations": 1,
+          "networkAttempts": 2,
+          "byteAcquires": 3,
+          "byteRejects": 0,
+          "byteReleases": 3,
+          "deadlineCallbacks": 0,
+          "terminalDispatches": 0,
+          "ghostWorkAttempts": 0,
+          "reservationAcquires": 1,
+          "reservationReleases": 1
+        }
+      },
+      {
+        "operationId": "op-overflow",
+        "code": "OVERLOADED",
+        "delivery": "NOT_SENT",
+        "attemptCount": 0,
+        "completionRoute": "DIRECT_PRE_ADMISSION",
+        "sideEffects": {
+          "permitAcquires": 0,
+          "permitRejects": 1,
+          "permitReleases": 0,
+          "observerStarts": 0,
+          "configurationSnapshots": 0,
+          "credentialResolutions": 0,
+          "defaultSnapshots": 0,
+          "idempotencyGenerations": 0,
+          "serializations": 0,
+          "networkAttempts": 0,
+          "byteAcquires": 0,
+          "byteRejects": 0,
+          "byteReleases": 0,
+          "deadlineCallbacks": 0,
+          "terminalDispatches": 0,
+          "ghostWorkAttempts": 0,
+          "reservationAcquires": 0,
+          "reservationReleases": 0
+        }
+      }
+    ],
+    "finalRuntime": {
+      "state": "OPEN",
+      "inFlight": 0,
+      "maxObservedInFlight": 1,
+      "completionReservations": 0,
+      "maxObservedCompletionReservations": 1,
+      "activeTerminalOperation": null,
+      "queuedTerminalTasks": 0,
+      "currentBufferedBytes": 0,
+      "maxObservedBufferedBytes": 2359296,
+      "queuedWaiters": 0,
+      "totalPermitAcquires": 1,
+      "totalPermitRejects": 1,
+      "totalPermitReleases": 1,
+      "totalReservationAcquires": 1,
+      "totalReservationReleases": 1,
+      "totalByteAcquires": 3,
+      "totalByteRejects": 0,
+      "totalByteReleases": 3,
+      "deadlineCallbacks": 0,
+      "terminalDispatches": 0,
+      "ghostWorkAttempts": 0,
+      "diagnostics": {
+        "inFlightOperations": 0,
+        "bufferedBytes": 0,
+        "concurrencyOverloadRejections": 1,
+        "requestByteOverloadRejections": 0,
+        "responseByteOverloadRejections": 0,
+        "responseHeaderLimitFailures": 0,
+        "executorOverloadRejections": 0,
+        "schedulerOverloadRejections": 0,
+        "responseCloseFailures": 0,
+        "droppedObserverEvents": 0,
+        "observerFailures": 0,
+        "closed": false
+      }
+    }
+  }
+}

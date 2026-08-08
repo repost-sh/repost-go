@@ -1,0 +1,152 @@
+{
+  "caseId": "network-proxy-authentication-required",
+  "category": "failure-mapping",
+  "description": "Execute enterprise network capability proxy-407 through the actual production raw-streaming transport and prove exact fixture state plus one-shot publication bounds.",
+  "input": {
+    "profile": "valid"
+  },
+  "options": {
+    "maxAttempts": 1,
+    "idempotencyKey": "idem_proxy_407",
+    "baseUrl": "$networkFixtureUrl"
+  },
+  "script": [
+    {
+      "actor": "fixture",
+      "action": "failProxyAuthentication",
+      "attempt": 1,
+      "status": 407,
+      "failureReason": "PROXY_AUTH_REQUIRED"
+    },
+    {
+      "actor": "runner",
+      "action": "proveNetworkCapability",
+      "capability": "proxy-407",
+      "endpointField": "trustedBaseUrl",
+      "setup": [
+        "reset"
+      ],
+      "operationOutcomes": [
+        "op1:primary=structured-error:code=PROXY:delivery=NOT_SENT:attempts=1:publications=0"
+      ],
+      "operationCount": 1,
+      "coreAttemptCount": 1,
+      "wireBodyPublications": 0,
+      "expectedState": "authenticatedProxy.authFailures=1;trusted.requests=0"
+    },
+    {
+      "actor": "runner",
+      "action": "drainRuntimeDiagnostics"
+    }
+  ],
+  "expected": {
+    "configurationTrace": [
+      "credential:REPOST_SEND_API_KEY",
+      "base-url:baseUrl",
+      "endpoint-path:/v1/messages",
+      "redirects:false",
+      "snapshot:1"
+    ],
+    "attemptTrace": [
+      "attempt:1:start@0",
+      "attempt:1:response:407@0",
+      "attempt:1:end:proxy-auth@0"
+    ],
+    "commitTrace": [
+      "attempt:1:NOT_SENT@0"
+    ],
+    "scheduleTrace": [],
+    "sideEffectTrace": [
+      "permit.acquire",
+      "configuration.snapshot",
+      "credentials.snapshot",
+      "defaults.snapshot",
+      "idempotency.generate:0",
+      "serialize:1",
+      "network:1",
+      "permit.release"
+    ],
+    "errorTrace": [
+      "terminal:PROXY:NOT_SENT"
+    ],
+    "error": {
+      "code": "PROXY",
+      "delivery": "NOT_SENT",
+      "attemptCount": 1,
+      "httpStatus": 407,
+      "retryable": false,
+      "compressedBytes": 0,
+      "decompressedBytes": 0,
+      "truncated": false,
+      "idempotencyKey": "idem_proxy_407",
+      "message": "Proxy connection failed",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": "op-0001",
+      "failureReason": "PROXY_AUTH_REQUIRED",
+      "remediationKey": "network.proxy.auth-required",
+      "causeCategory": "HTTP_RUNTIME",
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [],
+      "configurationIssues": [],
+      "issueCount": 0,
+      "issuesTruncated": false
+    },
+    "legacyBody": {
+      "code": "PROXY",
+      "message": "Proxy connection failed",
+      "truncated": false
+    },
+    "delivery": "NOT_SENT",
+    "byteTrace": [],
+    "redactionTrace": [],
+    "fixtureTrace": [
+      "fixture:attempt:1:proxy-auth:407",
+      "fixture:network:proxy-407:pass",
+      "fixture:network:proxy-407:setup:reset",
+      "fixture:network:proxy-407:outcomes:op1:primary=structured-error:code=PROXY:delivery=NOT_SENT:attempts=1:publications=0",
+      "fixture:network:proxy-407:operations:1:core-attempts:1:wire-body-publications:0:state:authenticatedProxy.authFailures=1;trusted.requests=0"
+    ],
+    "result": null,
+    "observerCallbackTrace": [],
+    "primarySurface": "sendOperation",
+    "completionRoute": "OPERATION_EXECUTION",
+    "runtimeDiagnostics": {
+      "inFlightOperations": 0,
+      "bufferedBytes": 0,
+      "concurrencyOverloadRejections": 0,
+      "requestByteOverloadRejections": 0,
+      "responseByteOverloadRejections": 0,
+      "responseHeaderLimitFailures": 0,
+      "executorOverloadRejections": 0,
+      "schedulerOverloadRejections": 0,
+      "responseCloseFailures": 0,
+      "droppedObserverEvents": 0,
+      "observerFailures": 0,
+      "closed": false
+    },
+    "outcomeEvidence": {
+      "operationId": "op-0001",
+      "primaryKind": "structured-error",
+      "nativeCancelled": false,
+      "settlements": 1,
+      "code": "PROXY",
+      "delivery": "NOT_SENT",
+      "attemptCount": 1,
+      "httpStatus": 407,
+      "idempotencyKey": "idem_proxy_407",
+      "noGhostWork": true,
+      "failureReason": "PROXY_AUTH_REQUIRED",
+      "remediationKey": "network.proxy.auth-required",
+      "causeCategory": "HTTP_RUNTIME"
+    },
+    "observerEmissionTrace": [
+      "operation.start|operationId=op-0001",
+      "attempt.start|operationId=op-0001|attempt=1",
+      "attempt.end|operationId=op-0001|attempt=1|durationMs=0|outcome=proxy-auth|code=PROXY|failureReason=PROXY_AUTH_REQUIRED|delivery=NOT_SENT|statusClass=4xx",
+      "operation.end|operationId=op-0001|durationMs=0|outcome=failed|code=PROXY|failureReason=PROXY_AUTH_REQUIRED|delivery=NOT_SENT|attempts=1"
+    ]
+  },
+  "executionMode": "enterprise-network-fixture"
+}

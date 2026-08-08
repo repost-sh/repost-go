@@ -1,0 +1,71 @@
+{
+  "caseId": "retry-descriptor-version-failure-not-attempted",
+  "category": "retry",
+  "description": "A descriptor version mismatch is rejected structurally at construction before an operation or side effect exists.",
+  "input": {
+    "profile": "valid"
+  },
+  "options": {
+    "descriptorVersion": 3
+  },
+  "script": [],
+  "expected": {
+    "configurationTrace": [
+      "snapshot:0"
+    ],
+    "attemptTrace": [],
+    "commitTrace": [],
+    "scheduleTrace": [],
+    "sideEffectTrace": [],
+    "errorTrace": [
+      "terminal:DESCRIPTOR_VERSION:NOT_SENT"
+    ],
+    "error": {
+      "code": "DESCRIPTOR_VERSION",
+      "delivery": "NOT_SENT",
+      "attemptCount": 0,
+      "httpStatus": null,
+      "retryable": false,
+      "compressedBytes": 0,
+      "decompressedBytes": 0,
+      "truncated": false,
+      "idempotencyKey": null,
+      "message": "Descriptor version is not supported",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": null,
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [],
+      "configurationIssues": [],
+      "issueCount": 0,
+      "issuesTruncated": false,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "delivery": "NOT_SENT",
+    "byteTrace": [],
+    "redactionTrace": [],
+    "fixtureTrace": [],
+    "result": null,
+    "legacyBody": {
+      "code": "DESCRIPTOR_VERSION",
+      "message": "Descriptor version is not supported",
+      "truncated": false
+    },
+    "primarySurface": "constructionThrow",
+    "completionRoute": null,
+    "observerCallbackTrace": [],
+    "constructionEvidence": {
+      "code": "DESCRIPTOR_VERSION",
+      "message": "Descriptor version is not supported",
+      "operationId": null,
+      "idempotencyKey": null,
+      "admitted": false,
+      "settlements": 0,
+      "causeCategory": null
+    },
+    "observerEmissionTrace": []
+  }
+}

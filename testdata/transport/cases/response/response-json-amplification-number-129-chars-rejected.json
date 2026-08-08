@@ -1,0 +1,145 @@
+{
+  "caseId": "response-json-amplification-number-129-chars-rejected",
+  "category": "response",
+  "description": "An unknown raw numeric token at 129 ASCII characters is rejected without BigInteger allocation.",
+  "input": {
+    "profile": "valid"
+  },
+  "options": {
+    "maxAttempts": 4,
+    "idempotencyKey": "idem_response_json_amplification_number_129_chars_rejected"
+  },
+  "script": [
+    {
+      "actor": "fixture",
+      "action": "respond",
+      "attempt": 1,
+      "status": 202,
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": {
+        "kind": "base64",
+        "data": "eyJpZCI6Im1zZ18xIiwidHlwZSI6ImNvbnRyYWN0LnNlbnQiLCJjdXN0b21lcklkIjoiY3VzX2NvbnRyYWN0IiwidGltZXN0YW1wIjoiMjAyNi0wMS0wMVQwMDowMDowMC4wMDBaIiwidSI6MTAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwfQ=="
+      }
+    },
+    {
+      "actor": "runner",
+      "action": "drainRuntimeDiagnostics"
+    }
+  ],
+  "expected": {
+    "configurationTrace": [
+      "credential:REPOST_SEND_API_KEY",
+      "base-url:default",
+      "endpoint-path:/v1/messages",
+      "redirects:false",
+      "snapshot:1"
+    ],
+    "attemptTrace": [
+      "attempt:1:start@0",
+      "attempt:1:commit@0",
+      "attempt:1:response:202@0",
+      "attempt:1:end:response-too-large@0"
+    ],
+    "commitTrace": [
+      "attempt:1:NOT_SENT@0",
+      "attempt:1:POSSIBLY_SENT@0",
+      "operation:POSSIBLY_SENT@0"
+    ],
+    "scheduleTrace": [],
+    "sideEffectTrace": [
+      "permit.acquire",
+      "configuration.snapshot",
+      "credentials.snapshot",
+      "defaults.snapshot",
+      "idempotency.generate:0",
+      "serialize:1",
+      "network:1",
+      "response.cancel",
+      "permit.release"
+    ],
+    "errorTrace": [
+      "terminal:RESPONSE_TOO_LARGE:POSSIBLY_SENT"
+    ],
+    "error": {
+      "code": "RESPONSE_TOO_LARGE",
+      "delivery": "POSSIBLY_SENT",
+      "attemptCount": 1,
+      "httpStatus": 202,
+      "retryable": false,
+      "compressedBytes": 238,
+      "decompressedBytes": 238,
+      "truncated": false,
+      "idempotencyKey": "idem_response_json_amplification_number_129_chars_rejected",
+      "message": "Response exceeds the size limit",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": "op-0001",
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null,
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [],
+      "configurationIssues": [],
+      "issueCount": 0,
+      "issuesTruncated": false
+    },
+    "legacyBody": {
+      "code": "RESPONSE_TOO_LARGE",
+      "message": "Response exceeds the size limit",
+      "truncated": false
+    },
+    "delivery": "POSSIBLY_SENT",
+    "byteTrace": [
+      "response-wire:238:accepted",
+      "response-decoded:238:accepted"
+    ],
+    "redactionTrace": [],
+    "fixtureTrace": [
+      "fixture:attempt:1:accepted",
+      "fixture:attempt:1:idempotency:idem_response_json_amplification_number_129_chars_rejected",
+      "fixture:attempt:1:response-cancelled:238"
+    ],
+    "result": null,
+    "observerCallbackTrace": [],
+    "primarySurface": "sendOperation",
+    "completionRoute": "OPERATION_EXECUTION",
+    "runtimeDiagnostics": {
+      "inFlightOperations": 0,
+      "bufferedBytes": 0,
+      "concurrencyOverloadRejections": 0,
+      "requestByteOverloadRejections": 0,
+      "responseByteOverloadRejections": 0,
+      "responseHeaderLimitFailures": 0,
+      "executorOverloadRejections": 0,
+      "schedulerOverloadRejections": 0,
+      "responseCloseFailures": 0,
+      "droppedObserverEvents": 0,
+      "observerFailures": 0,
+      "closed": false
+    },
+    "outcomeEvidence": {
+      "operationId": "op-0001",
+      "primaryKind": "structured-error",
+      "nativeCancelled": false,
+      "settlements": 1,
+      "code": "RESPONSE_TOO_LARGE",
+      "delivery": "POSSIBLY_SENT",
+      "attemptCount": 1,
+      "httpStatus": 202,
+      "idempotencyKey": "idem_response_json_amplification_number_129_chars_rejected",
+      "noGhostWork": true,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "observerEmissionTrace": [
+      "operation.start|operationId=op-0001",
+      "attempt.start|operationId=op-0001|attempt=1",
+      "attempt.end|operationId=op-0001|attempt=1|durationMs=0|outcome=response-too-large|code=RESPONSE_TOO_LARGE|failureReason=NONE|delivery=POSSIBLY_SENT|statusClass=2xx",
+      "operation.end|operationId=op-0001|durationMs=0|outcome=failed|code=RESPONSE_TOO_LARGE|failureReason=NONE|delivery=POSSIBLY_SENT|attempts=1"
+    ]
+  }
+}

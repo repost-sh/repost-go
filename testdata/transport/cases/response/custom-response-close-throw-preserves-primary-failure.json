@@ -1,0 +1,147 @@
+{
+  "caseId": "custom-response-close-throw-preserves-primary-failure",
+  "category": "response",
+  "executionMode": "custom-one-attempt",
+  "description": "A valid acquired 202 TransportResponse with a malformed body selects RESPONSE_PROTOCOL; a later nonblocking close failure increments diagnostics but cannot replace that primary failure.",
+  "input": {
+    "profile": "valid"
+  },
+  "options": {
+    "transportMode": "custom",
+    "maxAttempts": 1,
+    "idempotencyKey": "idem_custom_response_close_throw_primary_failure"
+  },
+  "script": [
+    {
+      "actor": "fixture",
+      "action": "respond",
+      "attempt": 1,
+      "status": 202,
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": {
+        "asset": "malformed"
+      },
+      "closeThrows": true
+    },
+    {
+      "actor": "runner",
+      "action": "drainRuntimeDiagnostics"
+    }
+  ],
+  "expected": {
+    "configurationTrace": [
+      "credential:REPOST_SEND_API_KEY",
+      "base-url:default",
+      "endpoint-path:/v1/messages",
+      "redirects:false",
+      "snapshot:1"
+    ],
+    "attemptTrace": [
+      "attempt:1:start@0",
+      "attempt:1:commit@0",
+      "attempt:1:response:202@0",
+      "attempt:1:end:response-protocol@0"
+    ],
+    "commitTrace": [
+      "attempt:1:NOT_SENT@0",
+      "attempt:1:POSSIBLY_SENT@0",
+      "operation:POSSIBLY_SENT@0"
+    ],
+    "scheduleTrace": [],
+    "sideEffectTrace": [
+      "permit.acquire",
+      "configuration.snapshot",
+      "credentials.snapshot",
+      "defaults.snapshot",
+      "idempotency.generate:0",
+      "serialize:1",
+      "network:1",
+      "permit.release"
+    ],
+    "errorTrace": [
+      "terminal:RESPONSE_PROTOCOL:POSSIBLY_SENT"
+    ],
+    "error": {
+      "code": "RESPONSE_PROTOCOL",
+      "delivery": "POSSIBLY_SENT",
+      "attemptCount": 1,
+      "httpStatus": 202,
+      "retryable": true,
+      "compressedBytes": 6,
+      "decompressedBytes": 6,
+      "truncated": false,
+      "idempotencyKey": "idem_custom_response_close_throw_primary_failure",
+      "message": "Response protocol is invalid",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": "op-0001",
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null,
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [],
+      "configurationIssues": [],
+      "issueCount": 0,
+      "issuesTruncated": false
+    },
+    "legacyBody": {
+      "code": "RESPONSE_PROTOCOL",
+      "message": "Response protocol is invalid",
+      "truncated": false
+    },
+    "delivery": "POSSIBLY_SENT",
+    "byteTrace": [
+      "response-wire:6:accepted",
+      "response-decoded:6:accepted"
+    ],
+    "redactionTrace": [],
+    "fixtureTrace": [
+      "fixture:attempt:1:accepted",
+      "fixture:attempt:1:idempotency:idem_custom_response_close_throw_primary_failure",
+      "fixture:attempt:1:response-bytes:6",
+      "fixture:attempt:1:response-close:1"
+    ],
+    "result": null,
+    "observerCallbackTrace": [],
+    "primarySurface": "sendOperation",
+    "completionRoute": "OPERATION_EXECUTION",
+    "runtimeDiagnostics": {
+      "inFlightOperations": 0,
+      "bufferedBytes": 0,
+      "concurrencyOverloadRejections": 0,
+      "requestByteOverloadRejections": 0,
+      "responseByteOverloadRejections": 0,
+      "responseHeaderLimitFailures": 0,
+      "executorOverloadRejections": 0,
+      "schedulerOverloadRejections": 0,
+      "responseCloseFailures": 1,
+      "droppedObserverEvents": 0,
+      "observerFailures": 0,
+      "closed": false
+    },
+    "outcomeEvidence": {
+      "operationId": "op-0001",
+      "primaryKind": "structured-error",
+      "nativeCancelled": false,
+      "settlements": 1,
+      "code": "RESPONSE_PROTOCOL",
+      "delivery": "POSSIBLY_SENT",
+      "attemptCount": 1,
+      "httpStatus": 202,
+      "idempotencyKey": "idem_custom_response_close_throw_primary_failure",
+      "noGhostWork": true,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "observerEmissionTrace": [
+      "operation.start|operationId=op-0001",
+      "attempt.start|operationId=op-0001|attempt=1",
+      "attempt.end|operationId=op-0001|attempt=1|durationMs=0|outcome=response-protocol|code=RESPONSE_PROTOCOL|failureReason=NONE|delivery=POSSIBLY_SENT|statusClass=2xx",
+      "operation.end|operationId=op-0001|durationMs=0|outcome=failed|code=RESPONSE_PROTOCOL|failureReason=NONE|delivery=POSSIBLY_SENT|attempts=1"
+    ]
+  }
+}

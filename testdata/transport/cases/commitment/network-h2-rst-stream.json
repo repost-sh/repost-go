@@ -1,0 +1,165 @@
+{
+  "caseId": "network-h2-rst-stream",
+  "category": "commitment",
+  "executionMode": "enterprise-network-fixture",
+  "description": "Execute enterprise network capability h2-rst-stream through the actual production raw-streaming transport and prove exact fixture state plus one-shot publication bounds.",
+  "input": {
+    "profile": "valid"
+  },
+  "options": {
+    "baseUrl": "$networkFixtureUrl",
+    "maxAttempts": 1,
+    "idempotencyKey": "idem_postcommit"
+  },
+  "script": [
+    {
+      "actor": "fixture",
+      "action": "failConnection",
+      "attempt": 1,
+      "phase": "afterRequestBytes",
+      "kind": "io",
+      "causeType": "ConformanceIoFailure",
+      "failureReason": "CONNECTION_RESET"
+    },
+    {
+      "actor": "runner",
+      "action": "proveNetworkCapability",
+      "capability": "h2-rst-stream",
+      "endpointField": "http2ResetBaseUrl",
+      "setup": [
+        "reset",
+        "start-reset-peer-and-probe-on-one-session",
+        "await-reset-and-peer-overlap",
+        "release-peer",
+        "probe-same-session-after-reset"
+      ],
+      "operationOutcomes": [
+        "op1:primary=structured-error:code=IO:delivery=POSSIBLY_SENT:attempts=1:publications=1:session=1:stream=1",
+        "op2:primary=success:code=OK:delivery=ACCEPTED:attempts=1:publications=1:session=1:stream=3",
+        "op3:primary=success:code=OK:delivery=ACCEPTED:attempts=1:publications=1:session=1:stream=5"
+      ],
+      "operationCount": 3,
+      "coreAttemptCount": 3,
+      "wireBodyPublications": 3,
+      "expectedState": "http2.collateralStreamFailures=0;http2.peerSuccesses=1;http2.postIsolationProbeSuccesses=1;http2.resetStreams=1;http2.sessions=1;http2.singleSessionStreamCount=3;http2.streams=3"
+    },
+    {
+      "actor": "runner",
+      "action": "drainRuntimeDiagnostics"
+    }
+  ],
+  "expected": {
+    "configurationTrace": [
+      "credential:REPOST_SEND_API_KEY",
+      "base-url:baseUrl",
+      "endpoint-path:/v1/messages",
+      "redirects:false",
+      "snapshot:1"
+    ],
+    "attemptTrace": [
+      "attempt:1:start@0",
+      "attempt:1:commit@0",
+      "attempt:1:end:io@0"
+    ],
+    "commitTrace": [
+      "attempt:1:NOT_SENT@0",
+      "attempt:1:POSSIBLY_SENT@0",
+      "operation:POSSIBLY_SENT@0"
+    ],
+    "scheduleTrace": [],
+    "sideEffectTrace": [
+      "permit.acquire",
+      "configuration.snapshot",
+      "credentials.snapshot",
+      "defaults.snapshot",
+      "idempotency.generate:0",
+      "serialize:1",
+      "network:1",
+      "permit.release"
+    ],
+    "errorTrace": [
+      "terminal:IO:POSSIBLY_SENT"
+    ],
+    "error": {
+      "code": "IO",
+      "delivery": "POSSIBLY_SENT",
+      "attemptCount": 1,
+      "httpStatus": null,
+      "retryable": true,
+      "compressedBytes": 0,
+      "decompressedBytes": 0,
+      "truncated": false,
+      "idempotencyKey": "idem_postcommit",
+      "message": "Transport I/O failed",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": "op-0001",
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [],
+      "configurationIssues": [],
+      "issueCount": 0,
+      "issuesTruncated": false,
+      "failureReason": "CONNECTION_RESET",
+      "remediationKey": "network.connection.reset",
+      "causeCategory": "HTTP_RUNTIME"
+    },
+    "delivery": "POSSIBLY_SENT",
+    "byteTrace": [],
+    "redactionTrace": [],
+    "fixtureTrace": [
+      "fixture:attempt:1:accepted",
+      "fixture:attempt:1:idempotency:idem_postcommit",
+      "fixture:attempt:1:request-bytes:1",
+      "fixture:attempt:1:failure:io",
+      "fixture:network:h2-rst-stream:pass",
+      "fixture:network:h2-rst-stream:setup:reset,start-reset-peer-and-probe-on-one-session,await-reset-and-peer-overlap,release-peer,probe-same-session-after-reset",
+      "fixture:network:h2-rst-stream:outcomes:op1:primary=structured-error:code=IO:delivery=POSSIBLY_SENT:attempts=1:publications=1:session=1:stream=1|op2:primary=success:code=OK:delivery=ACCEPTED:attempts=1:publications=1:session=1:stream=3|op3:primary=success:code=OK:delivery=ACCEPTED:attempts=1:publications=1:session=1:stream=5",
+      "fixture:network:h2-rst-stream:operations:3:core-attempts:3:wire-body-publications:3:state:http2.collateralStreamFailures=0;http2.peerSuccesses=1;http2.postIsolationProbeSuccesses=1;http2.resetStreams=1;http2.sessions=1;http2.singleSessionStreamCount=3;http2.streams=3"
+    ],
+    "result": null,
+    "legacyBody": {
+      "code": "IO",
+      "message": "Transport I/O failed",
+      "truncated": false
+    },
+    "outcomeEvidence": {
+      "operationId": "op-0001",
+      "primaryKind": "structured-error",
+      "nativeCancelled": false,
+      "settlements": 1,
+      "code": "IO",
+      "delivery": "POSSIBLY_SENT",
+      "attemptCount": 1,
+      "httpStatus": null,
+      "idempotencyKey": "idem_postcommit",
+      "noGhostWork": true,
+      "failureReason": "CONNECTION_RESET",
+      "remediationKey": "network.connection.reset",
+      "causeCategory": "HTTP_RUNTIME"
+    },
+    "primarySurface": "sendOperation",
+    "runtimeDiagnostics": {
+      "inFlightOperations": 0,
+      "bufferedBytes": 0,
+      "concurrencyOverloadRejections": 0,
+      "requestByteOverloadRejections": 0,
+      "responseByteOverloadRejections": 0,
+      "responseHeaderLimitFailures": 0,
+      "executorOverloadRejections": 0,
+      "schedulerOverloadRejections": 0,
+      "responseCloseFailures": 0,
+      "droppedObserverEvents": 0,
+      "observerFailures": 0,
+      "closed": false
+    },
+    "completionRoute": "OPERATION_EXECUTION",
+    "observerCallbackTrace": [],
+    "observerEmissionTrace": [
+      "operation.start|operationId=op-0001",
+      "attempt.start|operationId=op-0001|attempt=1",
+      "attempt.end|operationId=op-0001|attempt=1|durationMs=0|outcome=io|code=IO|failureReason=CONNECTION_RESET|delivery=POSSIBLY_SENT|statusClass=none",
+      "operation.end|operationId=op-0001|durationMs=0|outcome=failed|code=IO|failureReason=CONNECTION_RESET|delivery=POSSIBLY_SENT|attempts=1"
+    ]
+  }
+}

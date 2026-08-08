@@ -1,0 +1,2 @@
+go test fuzz v1
+[]byte("{\"id\":\"msg_1\",\"values\":[true,false,null]}")

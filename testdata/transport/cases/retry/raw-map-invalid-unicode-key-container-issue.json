@@ -1,0 +1,126 @@
+{
+  "caseId": "raw-map-invalid-unicode-key-container-issue",
+  "category": "retry",
+  "description": "Reject raw-map fixture invalid-unicode-key with one fixed container-level issue and zero entry traversal or raw-key publication.",
+  "input": {
+    "profile": "valid",
+    "send": {
+      "payload": {
+        "$invalidValue": {
+          "$rawMapFixture": "invalid-unicode-key"
+        }
+      }
+    }
+  },
+  "options": {},
+  "script": [
+    {
+      "actor": "runner",
+      "action": "drainRuntimeDiagnostics"
+    }
+  ],
+  "expected": {
+    "configurationTrace": [
+      "credential:REPOST_SEND_API_KEY",
+      "base-url:default",
+      "endpoint-path:/v1/messages",
+      "redirects:false",
+      "snapshot:1"
+    ],
+    "attemptTrace": [],
+    "commitTrace": [],
+    "scheduleTrace": [],
+    "sideEffectTrace": [
+      "permit.acquire",
+      "configuration.snapshot",
+      "credentials.snapshot",
+      "defaults.snapshot",
+      "idempotency.generate:1",
+      "permit.release"
+    ],
+    "errorTrace": [
+      "terminal:VALIDATION:NOT_SENT"
+    ],
+    "error": {
+      "code": "VALIDATION",
+      "delivery": "NOT_SENT",
+      "attemptCount": 0,
+      "httpStatus": null,
+      "retryable": false,
+      "compressedBytes": 0,
+      "decompressedBytes": 0,
+      "truncated": false,
+      "idempotencyKey": "idem_generated_0001",
+      "message": "Message validation failed",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": "op-0001",
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [
+        {
+          "code": "INVALID_UNICODE",
+          "path": "$.raw[{*}]"
+        }
+      ],
+      "configurationIssues": [],
+      "issueCount": 1,
+      "issuesTruncated": false,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "delivery": "NOT_SENT",
+    "byteTrace": [],
+    "redactionTrace": [],
+    "fixtureTrace": [],
+    "result": null,
+    "legacyBody": {
+      "code": "VALIDATION",
+      "message": "Message validation failed",
+      "truncated": false
+    },
+    "outcomeEvidence": {
+      "operationId": "op-0001",
+      "primaryKind": "structured-error",
+      "nativeCancelled": false,
+      "settlements": 1,
+      "code": "VALIDATION",
+      "delivery": "NOT_SENT",
+      "attemptCount": 0,
+      "httpStatus": null,
+      "idempotencyKey": "idem_generated_0001",
+      "noGhostWork": true,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "primarySurface": "sendOperation",
+    "runtimeDiagnostics": {
+      "inFlightOperations": 0,
+      "bufferedBytes": 0,
+      "concurrencyOverloadRejections": 0,
+      "requestByteOverloadRejections": 0,
+      "responseByteOverloadRejections": 0,
+      "responseHeaderLimitFailures": 0,
+      "executorOverloadRejections": 0,
+      "schedulerOverloadRejections": 0,
+      "responseCloseFailures": 0,
+      "droppedObserverEvents": 0,
+      "observerFailures": 0,
+      "closed": false
+    },
+    "completionRoute": "OPERATION_EXECUTION",
+    "observerCallbackTrace": [],
+    "rawMapEvidence": [
+      "fixture:raw-map:key-rejection:invalid-unicode-key",
+      "fixture:raw-map:issue-path:$.raw[{*}]",
+      "fixture:raw-map:entry-traversal:0",
+      "fixture:raw-map:raw-key-publications:0"
+    ],
+    "observerEmissionTrace": [
+      "operation.start|operationId=op-0001",
+      "operation.end|operationId=op-0001|durationMs=0|outcome=failed|code=VALIDATION|failureReason=NONE|delivery=NOT_SENT|attempts=0"
+    ]
+  }
+}

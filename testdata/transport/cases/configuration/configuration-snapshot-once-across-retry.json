@@ -1,0 +1,175 @@
+{
+  "caseId": "configuration-snapshot-once-across-retry",
+  "category": "configuration",
+  "description": "Provider, environment, base URL, defaults, and generated idempotency key are snapshotted once for all attempts.",
+  "input": {
+    "profile": "valid",
+    "providerValues": [
+      "provider-key",
+      "changed-key"
+    ],
+    "generatedValues": {
+      "idempotencyKeys": [
+        "idem_snapshot",
+        "idem_changed"
+      ]
+    },
+    "entropy": [
+      125
+    ]
+  },
+  "options": {
+    "apiKeyProvider": true
+  },
+  "script": [
+    {
+      "actor": "fixture",
+      "action": "respond",
+      "attempt": 1,
+      "status": 500,
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": {
+        "asset": "remoteError"
+      }
+    },
+    {
+      "actor": "runner",
+      "action": "advanceTime",
+      "byMs": 125
+    },
+    {
+      "actor": "fixture",
+      "action": "respond",
+      "attempt": 2,
+      "status": 202,
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": {
+        "asset": "validIdentity"
+      }
+    },
+    {
+      "actor": "runner",
+      "action": "drainRuntimeDiagnostics"
+    }
+  ],
+  "expected": {
+    "configurationTrace": [
+      "credential:apiKeyProvider",
+      "base-url:default",
+      "endpoint-path:/v1/messages",
+      "redirects:false",
+      "snapshot:1"
+    ],
+    "attemptTrace": [
+      "attempt:1:start@0",
+      "attempt:1:commit@0",
+      "attempt:1:response:500@0",
+      "attempt:1:end:server-failure@0",
+      "attempt:2:start@125",
+      "attempt:2:commit@125",
+      "attempt:2:response:202@125",
+      "attempt:2:end:accepted@125"
+    ],
+    "commitTrace": [
+      "attempt:1:NOT_SENT@0",
+      "attempt:1:POSSIBLY_SENT@0",
+      "operation:POSSIBLY_SENT@0",
+      "attempt:2:NOT_SENT@125",
+      "attempt:2:POSSIBLY_SENT@125"
+    ],
+    "scheduleTrace": [
+      "retry:1:cap=250@0",
+      "retry:1:bound=251@0",
+      "retry:1:entropy=125@0",
+      "retry:1:delay=125@0"
+    ],
+    "sideEffectTrace": [
+      "permit.acquire",
+      "configuration.snapshot",
+      "credentials.provider:1",
+      "credentials.snapshot",
+      "defaults.snapshot",
+      "idempotency.generate:1",
+      "serialize:1",
+      "network:2",
+      "permit.release"
+    ],
+    "errorTrace": [],
+    "error": null,
+    "delivery": "ACCEPTED",
+    "byteTrace": [
+      "response-wire:90:accepted",
+      "response-decoded:90:accepted",
+      "error-discarded:90:accepted",
+      "response-wire:104:accepted",
+      "response-decoded:104:accepted"
+    ],
+    "redactionTrace": [
+      "scan:render:clean",
+      "scan:logs:clean",
+      "scan:observer:clean",
+      "scan:metric-tags:clean",
+      "scan:spans:clean"
+    ],
+    "fixtureTrace": [
+      "fixture:attempt:1:accepted",
+      "fixture:attempt:1:idempotency:idem_snapshot",
+      "fixture:attempt:1:response-bytes:90",
+      "fixture:attempt:2:accepted",
+      "fixture:attempt:2:idempotency:idem_snapshot",
+      "fixture:attempt:2:response-bytes:104"
+    ],
+    "result": {
+      "id": "msg_1",
+      "type": "contract.sent",
+      "customerId": "cus_contract",
+      "timestamp": "2026-01-01T00:00:00.000Z"
+    },
+    "legacyBody": null,
+    "outcomeEvidence": {
+      "operationId": "op-0001",
+      "primaryKind": "success",
+      "nativeCancelled": false,
+      "settlements": 1,
+      "code": "OK",
+      "delivery": "ACCEPTED",
+      "attemptCount": 2,
+      "httpStatus": 202,
+      "idempotencyKey": "idem_snapshot",
+      "noGhostWork": true,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "primarySurface": "sendOperation",
+    "runtimeDiagnostics": {
+      "inFlightOperations": 0,
+      "bufferedBytes": 0,
+      "concurrencyOverloadRejections": 0,
+      "requestByteOverloadRejections": 0,
+      "responseByteOverloadRejections": 0,
+      "responseHeaderLimitFailures": 0,
+      "executorOverloadRejections": 0,
+      "schedulerOverloadRejections": 0,
+      "responseCloseFailures": 0,
+      "droppedObserverEvents": 0,
+      "observerFailures": 0,
+      "closed": false
+    },
+    "completionRoute": "OPERATION_EXECUTION",
+    "observerCallbackTrace": [],
+    "observerEmissionTrace": [
+      "operation.start|operationId=op-0001",
+      "attempt.start|operationId=op-0001|attempt=1",
+      "attempt.end|operationId=op-0001|attempt=1|durationMs=0|outcome=server-failure|code=SERVER_FAILURE|failureReason=NONE|delivery=POSSIBLY_SENT|statusClass=5xx",
+      "retry.delay|operationId=op-0001|attempt=2|delayMs=125",
+      "attempt.start|operationId=op-0001|attempt=2",
+      "attempt.end|operationId=op-0001|attempt=2|durationMs=0|outcome=accepted|code=NONE|failureReason=NONE|delivery=ACCEPTED|statusClass=2xx",
+      "operation.end|operationId=op-0001|durationMs=125|outcome=accepted|code=NONE|failureReason=NONE|delivery=ACCEPTED|attempts=2"
+    ]
+  }
+}

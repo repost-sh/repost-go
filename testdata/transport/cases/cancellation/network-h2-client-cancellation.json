@@ -1,0 +1,192 @@
+{
+  "caseId": "network-h2-client-cancellation",
+  "category": "cancellation",
+  "description": "Execute enterprise network capability h2-client-cancellation through the actual production raw-streaming transport and prove exact fixture state plus one-shot publication bounds.",
+  "input": {
+    "profile": "valid"
+  },
+  "options": {
+    "idempotencyKey": "idem_cancel",
+    "maxAttempts": 4,
+    "baseUrl": "$networkFixtureUrl"
+  },
+  "script": [
+    {
+      "actor": "fixture",
+      "action": "respondChunks",
+      "attempt": 1,
+      "status": 202,
+      "headers": {
+        "content-type": "application/json",
+        "content-encoding": "identity"
+      },
+      "chunks": [
+        {
+          "asset": "malformed"
+        }
+      ],
+      "complete": false
+    },
+    {
+      "actor": "fixture",
+      "action": "hold",
+      "attempt": 1,
+      "phase": "responseBody",
+      "barrier": "response-body",
+      "releaseAt": 6
+    },
+    {
+      "actor": "runner",
+      "action": "cancelSend",
+      "phase": "responseBody"
+    },
+    {
+      "actor": "runner",
+      "action": "proveNetworkCapability",
+      "capability": "h2-client-cancellation",
+      "endpointField": "http2HeldBaseUrl",
+      "setup": [
+        "reset",
+        "start-cancel-peer-and-probe-on-one-session",
+        "await-cancel-and-peer-overlap",
+        "cancel-target-with-rst-cancel",
+        "release-peer",
+        "probe-same-session-after-cancel"
+      ],
+      "operationOutcomes": [
+        "op1:primary=native-cancel:code=CANCELLED:delivery=CANCELLED_UNKNOWN:attempts=1:publications=1:session=1:stream=1:rst=CANCEL",
+        "op2:primary=success:code=OK:delivery=ACCEPTED:attempts=1:publications=1:session=1:stream=3",
+        "op3:primary=success:code=OK:delivery=ACCEPTED:attempts=1:publications=1:session=1:stream=5"
+      ],
+      "operationCount": 3,
+      "coreAttemptCount": 3,
+      "wireBodyPublications": 3,
+      "expectedState": "http2.cancelledStreams=1;http2.collateralStreamFailures=0;http2.peerSuccesses=1;http2.postIsolationProbeSuccesses=1;http2.sessions=1;http2.singleSessionStreamCount=3;http2.streams=3"
+    },
+    {
+      "actor": "runner",
+      "action": "drainRuntimeDiagnostics"
+    }
+  ],
+  "expected": {
+    "configurationTrace": [
+      "credential:REPOST_SEND_API_KEY",
+      "base-url:baseUrl",
+      "endpoint-path:/v1/messages",
+      "redirects:false",
+      "snapshot:1"
+    ],
+    "attemptTrace": [
+      "attempt:1:start@0",
+      "attempt:1:commit@0",
+      "attempt:1:response:202@0",
+      "attempt:1:end:cancelled@0"
+    ],
+    "commitTrace": [
+      "attempt:1:NOT_SENT@0",
+      "attempt:1:POSSIBLY_SENT@0",
+      "operation:POSSIBLY_SENT@0"
+    ],
+    "scheduleTrace": [],
+    "sideEffectTrace": [
+      "permit.acquire",
+      "configuration.snapshot",
+      "credentials.snapshot",
+      "defaults.snapshot",
+      "idempotency.generate:0",
+      "serialize:1",
+      "network:1",
+      "response.cancel",
+      "permit.release"
+    ],
+    "errorTrace": [
+      "terminal:CANCELLED:CANCELLED_UNKNOWN"
+    ],
+    "error": {
+      "code": "CANCELLED",
+      "delivery": "CANCELLED_UNKNOWN",
+      "attemptCount": 1,
+      "httpStatus": 202,
+      "retryable": false,
+      "compressedBytes": 6,
+      "decompressedBytes": 6,
+      "truncated": false,
+      "idempotencyKey": "idem_cancel",
+      "message": "Operation cancelled",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": "op-0001",
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [],
+      "configurationIssues": [],
+      "issueCount": 0,
+      "issuesTruncated": false,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "delivery": "CANCELLED_UNKNOWN",
+    "byteTrace": [
+      "response-wire:6:cancelled",
+      "response-decoded:6:cancelled"
+    ],
+    "redactionTrace": [],
+    "fixtureTrace": [
+      "fixture:attempt:1:accepted",
+      "fixture:attempt:1:idempotency:idem_cancel",
+      "fixture:attempt:1:response-cancelled:6",
+      "fixture:attempt:1:response-close:1",
+      "fixture:network:h2-client-cancellation:pass",
+      "fixture:network:h2-client-cancellation:setup:reset,start-cancel-peer-and-probe-on-one-session,await-cancel-and-peer-overlap,cancel-target-with-rst-cancel,release-peer,probe-same-session-after-cancel",
+      "fixture:network:h2-client-cancellation:outcomes:op1:primary=native-cancel:code=CANCELLED:delivery=CANCELLED_UNKNOWN:attempts=1:publications=1:session=1:stream=1:rst=CANCEL|op2:primary=success:code=OK:delivery=ACCEPTED:attempts=1:publications=1:session=1:stream=3|op3:primary=success:code=OK:delivery=ACCEPTED:attempts=1:publications=1:session=1:stream=5",
+      "fixture:network:h2-client-cancellation:operations:3:core-attempts:3:wire-body-publications:3:state:http2.cancelledStreams=1;http2.collateralStreamFailures=0;http2.peerSuccesses=1;http2.postIsolationProbeSuccesses=1;http2.sessions=1;http2.singleSessionStreamCount=3;http2.streams=3"
+    ],
+    "result": null,
+    "legacyBody": {
+      "code": "CANCELLED",
+      "message": "Operation cancelled",
+      "truncated": false
+    },
+    "outcomeEvidence": {
+      "operationId": "op-0001",
+      "primaryKind": "native-cancel",
+      "nativeCancelled": true,
+      "settlements": 1,
+      "code": "CANCELLED",
+      "delivery": "CANCELLED_UNKNOWN",
+      "attemptCount": 1,
+      "httpStatus": 202,
+      "idempotencyKey": "idem_cancel",
+      "noGhostWork": true,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "primarySurface": "sendOperation",
+    "runtimeDiagnostics": {
+      "inFlightOperations": 0,
+      "bufferedBytes": 0,
+      "concurrencyOverloadRejections": 0,
+      "requestByteOverloadRejections": 0,
+      "responseByteOverloadRejections": 0,
+      "responseHeaderLimitFailures": 0,
+      "executorOverloadRejections": 0,
+      "schedulerOverloadRejections": 0,
+      "responseCloseFailures": 0,
+      "droppedObserverEvents": 0,
+      "observerFailures": 0,
+      "closed": false
+    },
+    "completionRoute": "NATIVE_CANCEL",
+    "observerCallbackTrace": [],
+    "observerEmissionTrace": [
+      "operation.start|operationId=op-0001",
+      "attempt.start|operationId=op-0001|attempt=1",
+      "attempt.end|operationId=op-0001|attempt=1|durationMs=0|outcome=cancelled|code=CANCELLED|failureReason=NONE|delivery=CANCELLED_UNKNOWN|statusClass=2xx",
+      "operation.cancel|operationId=op-0001|delivery=CANCELLED_UNKNOWN",
+      "operation.end|operationId=op-0001|durationMs=0|outcome=cancelled|code=CANCELLED|failureReason=NONE|delivery=CANCELLED_UNKNOWN|attempts=1"
+    ]
+  },
+  "executionMode": "enterprise-network-fixture"
+}

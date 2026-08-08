@@ -1,0 +1,467 @@
+{
+  "scenarioId": "concurrency-runtime-diagnostics-counter-saturates-at-max-safe-integer",
+  "description": "The deterministic diagnostics seam seeds concurrencyOverloadRejections at MAX_COUNTER_VALUE-1. Two real direct capacity rejections publish MAX_COUNTER_VALUE then remain exactly saturated, after which release and a successful probe prove the counter boundary did not corrupt admission state.",
+  "runtime": {
+    "maxInFlight": 1,
+    "maxBufferedBytes": 4194304
+  },
+  "operations": [
+    {
+      "operationId": "op-counter-held",
+      "input": {
+        "profile": "valid"
+      },
+      "options": {
+        "idempotencyKey": "idem_counter_held"
+      },
+      "requestBytes": 104,
+      "fixtureScript": [
+        {
+          "action": "hold",
+          "attempt": 1,
+          "phase": "beforeRequestBytes",
+          "barrier": "counter-held"
+        },
+        {
+          "action": "respond",
+          "attempt": 1,
+          "status": 202,
+          "bodyKind": "valid",
+          "responseBytes": 104
+        }
+      ]
+    },
+    {
+      "operationId": "op-counter-reject-a",
+      "input": {
+        "profile": "valid"
+      },
+      "options": {
+        "idempotencyKey": "idem_counter_reject_a"
+      },
+      "requestBytes": 104,
+      "fixtureScript": [
+        {
+          "action": "respond",
+          "attempt": 1,
+          "status": 202,
+          "bodyKind": "valid",
+          "responseBytes": 104
+        }
+      ]
+    },
+    {
+      "operationId": "op-counter-reject-b",
+      "input": {
+        "profile": "valid"
+      },
+      "options": {
+        "idempotencyKey": "idem_counter_reject_b"
+      },
+      "requestBytes": 104,
+      "fixtureScript": [
+        {
+          "action": "respond",
+          "attempt": 1,
+          "status": 202,
+          "bodyKind": "valid",
+          "responseBytes": 104
+        }
+      ]
+    },
+    {
+      "operationId": "op-counter-probe",
+      "input": {
+        "profile": "valid"
+      },
+      "options": {
+        "idempotencyKey": "idem_counter_probe"
+      },
+      "requestBytes": 104,
+      "fixtureScript": [
+        {
+          "action": "respond",
+          "attempt": 1,
+          "status": 202,
+          "bodyKind": "valid",
+          "responseBytes": 104
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "action": "start",
+      "operationId": "op-counter-held"
+    },
+    {
+      "action": "awaitBarrier",
+      "operationId": "op-counter-held",
+      "barrier": "counter-held"
+    },
+    {
+      "action": "seedDiagnosticCounter",
+      "counter": "concurrencyOverloadRejections",
+      "value": 9007199254740990
+    },
+    {
+      "action": "checkpoint",
+      "name": "counter-seeded"
+    },
+    {
+      "action": "start",
+      "operationId": "op-counter-reject-a"
+    },
+    {
+      "action": "awaitTerminal",
+      "operationId": "op-counter-reject-a"
+    },
+    {
+      "action": "checkpoint",
+      "name": "counter-reached-maximum"
+    },
+    {
+      "action": "start",
+      "operationId": "op-counter-reject-b"
+    },
+    {
+      "action": "awaitTerminal",
+      "operationId": "op-counter-reject-b"
+    },
+    {
+      "action": "checkpoint",
+      "name": "counter-remained-saturated"
+    },
+    {
+      "action": "release",
+      "barrier": "counter-held"
+    },
+    {
+      "action": "awaitTerminal",
+      "operationId": "op-counter-held"
+    },
+    {
+      "action": "start",
+      "operationId": "op-counter-probe"
+    },
+    {
+      "action": "awaitTerminal",
+      "operationId": "op-counter-probe"
+    },
+    {
+      "action": "checkpoint",
+      "name": "counter-boundary-probed"
+    }
+  ],
+  "expected": {
+    "orderedTrace": [
+      "operation:op-counter-held:permit.acquire:inFlight=1",
+      "operation:op-counter-held:reservation.acquire:reserved=1",
+      "operation:op-counter-held:observer.start",
+      "barrier:counter-held:reached:operation=op-counter-held:inFlight=1",
+      "runtime:diagnostic.seed:counter=concurrencyOverloadRejections:value=9007199254740990",
+      "checkpoint:counter-seeded:state=OPEN:inFlight=1:queuedWaiters=0",
+      "operation:op-counter-reject-a:permit.reject:inFlight=1",
+      "operation:op-counter-reject-a:terminal:OVERLOADED:NOT_SENT:attempts=0",
+      "checkpoint:counter-reached-maximum:state=OPEN:inFlight=1:queuedWaiters=0",
+      "operation:op-counter-reject-b:permit.reject:inFlight=1",
+      "operation:op-counter-reject-b:terminal:OVERLOADED:NOT_SENT:attempts=0",
+      "checkpoint:counter-remained-saturated:state=OPEN:inFlight=1:queuedWaiters=0",
+      "operation:op-counter-held:permit.release:inFlight=0",
+      "operation:op-counter-held:primary.complete:OK:ACCEPTED",
+      "operation:op-counter-held:outcome.complete:OK:ACCEPTED",
+      "operation:op-counter-held:reservation.release:reserved=0",
+      "operation:op-counter-held:terminal:OK:ACCEPTED:attempts=1",
+      "operation:op-counter-probe:permit.acquire:inFlight=1",
+      "operation:op-counter-probe:reservation.acquire:reserved=1",
+      "operation:op-counter-probe:observer.start",
+      "operation:op-counter-probe:permit.release:inFlight=0",
+      "operation:op-counter-probe:primary.complete:OK:ACCEPTED",
+      "operation:op-counter-probe:outcome.complete:OK:ACCEPTED",
+      "operation:op-counter-probe:reservation.release:reserved=0",
+      "operation:op-counter-probe:terminal:OK:ACCEPTED:attempts=1",
+      "checkpoint:counter-boundary-probed:state=OPEN:inFlight=0:queuedWaiters=0"
+    ],
+    "checkpoints": [
+      {
+        "name": "counter-seeded",
+        "state": "OPEN",
+        "inFlight": 1,
+        "completionReservations": 1,
+        "activeTerminalOperation": null,
+        "queuedTerminalTasks": 0,
+        "currentBufferedBytes": 1310824,
+        "queuedWaiters": 0,
+        "totalPermitAcquires": 1,
+        "totalPermitRejects": 0,
+        "totalPermitReleases": 0,
+        "totalByteAcquires": 3,
+        "totalByteRejects": 0,
+        "totalByteReleases": 0,
+        "deadlineCallbacks": 0,
+        "terminalDispatches": 0,
+        "ghostWorkAttempts": 0,
+        "diagnostics": {
+          "inFlightOperations": 1,
+          "bufferedBytes": 1310824,
+          "concurrencyOverloadRejections": 9007199254740990,
+          "requestByteOverloadRejections": 0,
+          "responseByteOverloadRejections": 0,
+          "responseHeaderLimitFailures": 0,
+          "executorOverloadRejections": 0,
+          "schedulerOverloadRejections": 0,
+          "responseCloseFailures": 0,
+          "droppedObserverEvents": 0,
+          "observerFailures": 0,
+          "closed": false
+        }
+      },
+      {
+        "name": "counter-reached-maximum",
+        "state": "OPEN",
+        "inFlight": 1,
+        "completionReservations": 1,
+        "activeTerminalOperation": null,
+        "queuedTerminalTasks": 0,
+        "currentBufferedBytes": 1310824,
+        "queuedWaiters": 0,
+        "totalPermitAcquires": 1,
+        "totalPermitRejects": 1,
+        "totalPermitReleases": 0,
+        "totalByteAcquires": 3,
+        "totalByteRejects": 0,
+        "totalByteReleases": 0,
+        "deadlineCallbacks": 0,
+        "terminalDispatches": 0,
+        "ghostWorkAttempts": 0,
+        "diagnostics": {
+          "inFlightOperations": 1,
+          "bufferedBytes": 1310824,
+          "concurrencyOverloadRejections": 9007199254740991,
+          "requestByteOverloadRejections": 0,
+          "responseByteOverloadRejections": 0,
+          "responseHeaderLimitFailures": 0,
+          "executorOverloadRejections": 0,
+          "schedulerOverloadRejections": 0,
+          "responseCloseFailures": 0,
+          "droppedObserverEvents": 0,
+          "observerFailures": 0,
+          "closed": false
+        }
+      },
+      {
+        "name": "counter-remained-saturated",
+        "state": "OPEN",
+        "inFlight": 1,
+        "completionReservations": 1,
+        "activeTerminalOperation": null,
+        "queuedTerminalTasks": 0,
+        "currentBufferedBytes": 1310824,
+        "queuedWaiters": 0,
+        "totalPermitAcquires": 1,
+        "totalPermitRejects": 2,
+        "totalPermitReleases": 0,
+        "totalByteAcquires": 3,
+        "totalByteRejects": 0,
+        "totalByteReleases": 0,
+        "deadlineCallbacks": 0,
+        "terminalDispatches": 0,
+        "ghostWorkAttempts": 0,
+        "diagnostics": {
+          "inFlightOperations": 1,
+          "bufferedBytes": 1310824,
+          "concurrencyOverloadRejections": 9007199254740991,
+          "requestByteOverloadRejections": 0,
+          "responseByteOverloadRejections": 0,
+          "responseHeaderLimitFailures": 0,
+          "executorOverloadRejections": 0,
+          "schedulerOverloadRejections": 0,
+          "responseCloseFailures": 0,
+          "droppedObserverEvents": 0,
+          "observerFailures": 0,
+          "closed": false
+        }
+      },
+      {
+        "name": "counter-boundary-probed",
+        "state": "OPEN",
+        "inFlight": 0,
+        "completionReservations": 0,
+        "activeTerminalOperation": null,
+        "queuedTerminalTasks": 0,
+        "currentBufferedBytes": 0,
+        "queuedWaiters": 0,
+        "totalPermitAcquires": 2,
+        "totalPermitRejects": 2,
+        "totalPermitReleases": 2,
+        "totalByteAcquires": 6,
+        "totalByteRejects": 0,
+        "totalByteReleases": 6,
+        "deadlineCallbacks": 0,
+        "terminalDispatches": 0,
+        "ghostWorkAttempts": 0,
+        "diagnostics": {
+          "inFlightOperations": 0,
+          "bufferedBytes": 0,
+          "concurrencyOverloadRejections": 9007199254740991,
+          "requestByteOverloadRejections": 0,
+          "responseByteOverloadRejections": 0,
+          "responseHeaderLimitFailures": 0,
+          "executorOverloadRejections": 0,
+          "schedulerOverloadRejections": 0,
+          "responseCloseFailures": 0,
+          "droppedObserverEvents": 0,
+          "observerFailures": 0,
+          "closed": false
+        }
+      }
+    ],
+    "operations": [
+      {
+        "operationId": "op-counter-held",
+        "code": "OK",
+        "delivery": "ACCEPTED",
+        "attemptCount": 1,
+        "completionRoute": "OPERATION_EXECUTION",
+        "sideEffects": {
+          "permitAcquires": 1,
+          "permitRejects": 0,
+          "permitReleases": 1,
+          "observerStarts": 1,
+          "configurationSnapshots": 1,
+          "credentialResolutions": 1,
+          "defaultSnapshots": 1,
+          "idempotencyGenerations": 0,
+          "serializations": 1,
+          "networkAttempts": 1,
+          "byteAcquires": 3,
+          "byteRejects": 0,
+          "byteReleases": 3,
+          "deadlineCallbacks": 0,
+          "terminalDispatches": 0,
+          "ghostWorkAttempts": 0,
+          "reservationAcquires": 1,
+          "reservationReleases": 1
+        }
+      },
+      {
+        "operationId": "op-counter-reject-a",
+        "code": "OVERLOADED",
+        "delivery": "NOT_SENT",
+        "attemptCount": 0,
+        "completionRoute": "DIRECT_PRE_ADMISSION",
+        "sideEffects": {
+          "permitAcquires": 0,
+          "permitRejects": 1,
+          "permitReleases": 0,
+          "observerStarts": 0,
+          "configurationSnapshots": 0,
+          "credentialResolutions": 0,
+          "defaultSnapshots": 0,
+          "idempotencyGenerations": 0,
+          "serializations": 0,
+          "networkAttempts": 0,
+          "byteAcquires": 0,
+          "byteRejects": 0,
+          "byteReleases": 0,
+          "deadlineCallbacks": 0,
+          "terminalDispatches": 0,
+          "ghostWorkAttempts": 0,
+          "reservationAcquires": 0,
+          "reservationReleases": 0
+        }
+      },
+      {
+        "operationId": "op-counter-reject-b",
+        "code": "OVERLOADED",
+        "delivery": "NOT_SENT",
+        "attemptCount": 0,
+        "completionRoute": "DIRECT_PRE_ADMISSION",
+        "sideEffects": {
+          "permitAcquires": 0,
+          "permitRejects": 1,
+          "permitReleases": 0,
+          "observerStarts": 0,
+          "configurationSnapshots": 0,
+          "credentialResolutions": 0,
+          "defaultSnapshots": 0,
+          "idempotencyGenerations": 0,
+          "serializations": 0,
+          "networkAttempts": 0,
+          "byteAcquires": 0,
+          "byteRejects": 0,
+          "byteReleases": 0,
+          "deadlineCallbacks": 0,
+          "terminalDispatches": 0,
+          "ghostWorkAttempts": 0,
+          "reservationAcquires": 0,
+          "reservationReleases": 0
+        }
+      },
+      {
+        "operationId": "op-counter-probe",
+        "code": "OK",
+        "delivery": "ACCEPTED",
+        "attemptCount": 1,
+        "completionRoute": "OPERATION_EXECUTION",
+        "sideEffects": {
+          "permitAcquires": 1,
+          "permitRejects": 0,
+          "permitReleases": 1,
+          "observerStarts": 1,
+          "configurationSnapshots": 1,
+          "credentialResolutions": 1,
+          "defaultSnapshots": 1,
+          "idempotencyGenerations": 0,
+          "serializations": 1,
+          "networkAttempts": 1,
+          "byteAcquires": 3,
+          "byteRejects": 0,
+          "byteReleases": 3,
+          "deadlineCallbacks": 0,
+          "terminalDispatches": 0,
+          "ghostWorkAttempts": 0,
+          "reservationAcquires": 1,
+          "reservationReleases": 1
+        }
+      }
+    ],
+    "finalRuntime": {
+      "state": "OPEN",
+      "inFlight": 0,
+      "maxObservedInFlight": 1,
+      "completionReservations": 0,
+      "maxObservedCompletionReservations": 1,
+      "activeTerminalOperation": null,
+      "queuedTerminalTasks": 0,
+      "currentBufferedBytes": 0,
+      "maxObservedBufferedBytes": 2359296,
+      "queuedWaiters": 0,
+      "totalPermitAcquires": 2,
+      "totalPermitRejects": 2,
+      "totalPermitReleases": 2,
+      "totalReservationAcquires": 2,
+      "totalReservationReleases": 2,
+      "totalByteAcquires": 6,
+      "totalByteRejects": 0,
+      "totalByteReleases": 6,
+      "deadlineCallbacks": 0,
+      "terminalDispatches": 0,
+      "ghostWorkAttempts": 0,
+      "diagnostics": {
+        "inFlightOperations": 0,
+        "bufferedBytes": 0,
+        "concurrencyOverloadRejections": 9007199254740991,
+        "requestByteOverloadRejections": 0,
+        "responseByteOverloadRejections": 0,
+        "responseHeaderLimitFailures": 0,
+        "executorOverloadRejections": 0,
+        "schedulerOverloadRejections": 0,
+        "responseCloseFailures": 0,
+        "droppedObserverEvents": 0,
+        "observerFailures": 0,
+        "closed": false
+      }
+    }
+  }
+}

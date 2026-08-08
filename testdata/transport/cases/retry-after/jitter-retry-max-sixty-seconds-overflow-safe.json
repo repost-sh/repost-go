@@ -1,0 +1,147 @@
+{
+  "caseId": "jitter-retry-max-sixty-seconds-overflow-safe",
+  "category": "retry-after",
+  "description": "A huge retry base is capped at 60000 ms with saturating arithmetic before jitter.",
+  "input": {
+    "profile": "valid",
+    "entropy": [
+      60000
+    ]
+  },
+  "options": {
+    "retryBaseMs": 9223372036854,
+    "maxAttempts": 2,
+    "idempotencyKey": "idem_retry_cap"
+  },
+  "script": [
+    {
+      "actor": "fixture",
+      "action": "failConnection",
+      "attempt": 1,
+      "phase": "beforeRequestBytes",
+      "kind": "dns"
+    },
+    {
+      "actor": "runner",
+      "action": "advanceTime",
+      "byMs": 60000
+    },
+    {
+      "actor": "fixture",
+      "action": "respond",
+      "attempt": 2,
+      "status": 202,
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": {
+        "asset": "validIdentity"
+      }
+    },
+    {
+      "actor": "runner",
+      "action": "drainRuntimeDiagnostics"
+    }
+  ],
+  "expected": {
+    "configurationTrace": [
+      "credential:REPOST_SEND_API_KEY",
+      "base-url:default",
+      "endpoint-path:/v1/messages",
+      "redirects:false",
+      "snapshot:1"
+    ],
+    "attemptTrace": [
+      "attempt:1:start@0",
+      "attempt:1:end:dns@0",
+      "attempt:2:start@60000",
+      "attempt:2:commit@60000",
+      "attempt:2:response:202@60000",
+      "attempt:2:end:accepted@60000"
+    ],
+    "commitTrace": [
+      "attempt:1:NOT_SENT@0",
+      "attempt:2:NOT_SENT@60000",
+      "attempt:2:POSSIBLY_SENT@60000",
+      "operation:POSSIBLY_SENT@60000"
+    ],
+    "scheduleTrace": [
+      "retry:1:cap=60000@0",
+      "retry:1:bound=60001@0",
+      "retry:1:entropy=60000@0",
+      "retry:1:delay=60000@0"
+    ],
+    "sideEffectTrace": [
+      "permit.acquire",
+      "configuration.snapshot",
+      "credentials.snapshot",
+      "defaults.snapshot",
+      "idempotency.generate:0",
+      "serialize:1",
+      "network:2",
+      "permit.release"
+    ],
+    "errorTrace": [],
+    "error": null,
+    "delivery": "ACCEPTED",
+    "byteTrace": [
+      "response-wire:104:accepted",
+      "response-decoded:104:accepted"
+    ],
+    "redactionTrace": [],
+    "fixtureTrace": [
+      "fixture:attempt:1:failure:dns",
+      "fixture:attempt:2:accepted",
+      "fixture:attempt:2:idempotency:idem_retry_cap",
+      "fixture:attempt:2:response-bytes:104"
+    ],
+    "result": {
+      "id": "msg_1",
+      "type": "contract.sent",
+      "customerId": "cus_contract",
+      "timestamp": "2026-01-01T00:00:00.000Z"
+    },
+    "legacyBody": null,
+    "outcomeEvidence": {
+      "operationId": "op-0001",
+      "primaryKind": "success",
+      "nativeCancelled": false,
+      "settlements": 1,
+      "code": "OK",
+      "delivery": "ACCEPTED",
+      "attemptCount": 2,
+      "httpStatus": 202,
+      "idempotencyKey": "idem_retry_cap",
+      "noGhostWork": true,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "primarySurface": "sendOperation",
+    "runtimeDiagnostics": {
+      "inFlightOperations": 0,
+      "bufferedBytes": 0,
+      "concurrencyOverloadRejections": 0,
+      "requestByteOverloadRejections": 0,
+      "responseByteOverloadRejections": 0,
+      "responseHeaderLimitFailures": 0,
+      "executorOverloadRejections": 0,
+      "schedulerOverloadRejections": 0,
+      "responseCloseFailures": 0,
+      "droppedObserverEvents": 0,
+      "observerFailures": 0,
+      "closed": false
+    },
+    "completionRoute": "OPERATION_EXECUTION",
+    "observerCallbackTrace": [],
+    "observerEmissionTrace": [
+      "operation.start|operationId=op-0001",
+      "attempt.start|operationId=op-0001|attempt=1",
+      "attempt.end|operationId=op-0001|attempt=1|durationMs=0|outcome=dns|code=DNS|failureReason=UNKNOWN|delivery=NOT_SENT|statusClass=none",
+      "retry.delay|operationId=op-0001|attempt=2|delayMs=60000",
+      "attempt.start|operationId=op-0001|attempt=2",
+      "attempt.end|operationId=op-0001|attempt=2|durationMs=0|outcome=accepted|code=NONE|failureReason=NONE|delivery=ACCEPTED|statusClass=2xx",
+      "operation.end|operationId=op-0001|durationMs=60000|outcome=accepted|code=NONE|failureReason=NONE|delivery=ACCEPTED|attempts=2"
+    ]
+  }
+}

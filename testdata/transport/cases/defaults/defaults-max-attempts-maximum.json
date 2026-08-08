@@ -1,0 +1,441 @@
+{
+  "caseId": "defaults-max-attempts-maximum",
+  "category": "defaults",
+  "description": "maxAttempts 10 performs exactly ten total attempts, nine bounded retry schedules, one stable key, and one permit lifecycle.",
+  "input": {
+    "profile": "valid",
+    "entropy": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "options": {
+    "maxAttempts": 10,
+    "idempotencyKey": "idem_attempts_10"
+  },
+  "script": [
+    {
+      "actor": "fixture",
+      "action": "respond",
+      "attempt": 1,
+      "status": 500,
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": {
+        "asset": "remoteError"
+      }
+    },
+    {
+      "actor": "fixture",
+      "action": "respond",
+      "attempt": 2,
+      "status": 500,
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": {
+        "asset": "remoteError"
+      }
+    },
+    {
+      "actor": "fixture",
+      "action": "respond",
+      "attempt": 3,
+      "status": 500,
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": {
+        "asset": "remoteError"
+      }
+    },
+    {
+      "actor": "fixture",
+      "action": "respond",
+      "attempt": 4,
+      "status": 500,
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": {
+        "asset": "remoteError"
+      }
+    },
+    {
+      "actor": "fixture",
+      "action": "respond",
+      "attempt": 5,
+      "status": 500,
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": {
+        "asset": "remoteError"
+      }
+    },
+    {
+      "actor": "fixture",
+      "action": "respond",
+      "attempt": 6,
+      "status": 500,
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": {
+        "asset": "remoteError"
+      }
+    },
+    {
+      "actor": "fixture",
+      "action": "respond",
+      "attempt": 7,
+      "status": 500,
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": {
+        "asset": "remoteError"
+      }
+    },
+    {
+      "actor": "fixture",
+      "action": "respond",
+      "attempt": 8,
+      "status": 500,
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": {
+        "asset": "remoteError"
+      }
+    },
+    {
+      "actor": "fixture",
+      "action": "respond",
+      "attempt": 9,
+      "status": 500,
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": {
+        "asset": "remoteError"
+      }
+    },
+    {
+      "actor": "fixture",
+      "action": "respond",
+      "attempt": 10,
+      "status": 500,
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": {
+        "asset": "remoteError"
+      }
+    },
+    {
+      "actor": "runner",
+      "action": "drainRuntimeDiagnostics"
+    }
+  ],
+  "expected": {
+    "configurationTrace": [
+      "credential:REPOST_SEND_API_KEY",
+      "base-url:default",
+      "endpoint-path:/v1/messages",
+      "redirects:false",
+      "snapshot:1"
+    ],
+    "attemptTrace": [
+      "attempt:1:start@0",
+      "attempt:1:commit@0",
+      "attempt:1:response:500@0",
+      "attempt:1:end:server-failure@0",
+      "attempt:2:start@0",
+      "attempt:2:commit@0",
+      "attempt:2:response:500@0",
+      "attempt:2:end:server-failure@0",
+      "attempt:3:start@0",
+      "attempt:3:commit@0",
+      "attempt:3:response:500@0",
+      "attempt:3:end:server-failure@0",
+      "attempt:4:start@0",
+      "attempt:4:commit@0",
+      "attempt:4:response:500@0",
+      "attempt:4:end:server-failure@0",
+      "attempt:5:start@0",
+      "attempt:5:commit@0",
+      "attempt:5:response:500@0",
+      "attempt:5:end:server-failure@0",
+      "attempt:6:start@0",
+      "attempt:6:commit@0",
+      "attempt:6:response:500@0",
+      "attempt:6:end:server-failure@0",
+      "attempt:7:start@0",
+      "attempt:7:commit@0",
+      "attempt:7:response:500@0",
+      "attempt:7:end:server-failure@0",
+      "attempt:8:start@0",
+      "attempt:8:commit@0",
+      "attempt:8:response:500@0",
+      "attempt:8:end:server-failure@0",
+      "attempt:9:start@0",
+      "attempt:9:commit@0",
+      "attempt:9:response:500@0",
+      "attempt:9:end:server-failure@0",
+      "attempt:10:start@0",
+      "attempt:10:commit@0",
+      "attempt:10:response:500@0",
+      "attempt:10:end:server-failure@0"
+    ],
+    "commitTrace": [
+      "attempt:1:NOT_SENT@0",
+      "attempt:1:POSSIBLY_SENT@0",
+      "operation:POSSIBLY_SENT@0",
+      "attempt:2:NOT_SENT@0",
+      "attempt:2:POSSIBLY_SENT@0",
+      "attempt:3:NOT_SENT@0",
+      "attempt:3:POSSIBLY_SENT@0",
+      "attempt:4:NOT_SENT@0",
+      "attempt:4:POSSIBLY_SENT@0",
+      "attempt:5:NOT_SENT@0",
+      "attempt:5:POSSIBLY_SENT@0",
+      "attempt:6:NOT_SENT@0",
+      "attempt:6:POSSIBLY_SENT@0",
+      "attempt:7:NOT_SENT@0",
+      "attempt:7:POSSIBLY_SENT@0",
+      "attempt:8:NOT_SENT@0",
+      "attempt:8:POSSIBLY_SENT@0",
+      "attempt:9:NOT_SENT@0",
+      "attempt:9:POSSIBLY_SENT@0",
+      "attempt:10:NOT_SENT@0",
+      "attempt:10:POSSIBLY_SENT@0"
+    ],
+    "scheduleTrace": [
+      "retry:1:cap=250@0",
+      "retry:1:bound=251@0",
+      "retry:1:entropy=0@0",
+      "retry:1:delay=0@0",
+      "retry:2:cap=500@0",
+      "retry:2:bound=501@0",
+      "retry:2:entropy=0@0",
+      "retry:2:delay=0@0",
+      "retry:3:cap=1000@0",
+      "retry:3:bound=1001@0",
+      "retry:3:entropy=0@0",
+      "retry:3:delay=0@0",
+      "retry:4:cap=2000@0",
+      "retry:4:bound=2001@0",
+      "retry:4:entropy=0@0",
+      "retry:4:delay=0@0",
+      "retry:5:cap=4000@0",
+      "retry:5:bound=4001@0",
+      "retry:5:entropy=0@0",
+      "retry:5:delay=0@0",
+      "retry:6:cap=8000@0",
+      "retry:6:bound=8001@0",
+      "retry:6:entropy=0@0",
+      "retry:6:delay=0@0",
+      "retry:7:cap=16000@0",
+      "retry:7:bound=16001@0",
+      "retry:7:entropy=0@0",
+      "retry:7:delay=0@0",
+      "retry:8:cap=32000@0",
+      "retry:8:bound=32001@0",
+      "retry:8:entropy=0@0",
+      "retry:8:delay=0@0",
+      "retry:9:cap=60000@0",
+      "retry:9:bound=60001@0",
+      "retry:9:entropy=0@0",
+      "retry:9:delay=0@0"
+    ],
+    "sideEffectTrace": [
+      "permit.acquire",
+      "configuration.snapshot",
+      "credentials.snapshot",
+      "defaults.snapshot",
+      "idempotency.generate:0",
+      "serialize:1",
+      "network:10",
+      "permit.release"
+    ],
+    "errorTrace": [
+      "terminal:SERVER_FAILURE:POSSIBLY_SENT"
+    ],
+    "error": {
+      "code": "SERVER_FAILURE",
+      "delivery": "POSSIBLY_SENT",
+      "attemptCount": 10,
+      "httpStatus": 500,
+      "retryable": true,
+      "compressedBytes": 90,
+      "decompressedBytes": 90,
+      "truncated": false,
+      "idempotencyKey": "idem_attempts_10",
+      "message": "Server failed to process the request",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": "op-0001",
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null,
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [],
+      "configurationIssues": [],
+      "issueCount": 0,
+      "issuesTruncated": false
+    },
+    "legacyBody": {
+      "code": "SERVER_FAILURE",
+      "message": "Server failed to process the request",
+      "truncated": false
+    },
+    "delivery": "POSSIBLY_SENT",
+    "byteTrace": [
+      "response-wire:90:accepted",
+      "response-decoded:90:accepted",
+      "error-discarded:90:accepted",
+      "response-wire:90:accepted",
+      "response-decoded:90:accepted",
+      "error-discarded:90:accepted",
+      "response-wire:90:accepted",
+      "response-decoded:90:accepted",
+      "error-discarded:90:accepted",
+      "response-wire:90:accepted",
+      "response-decoded:90:accepted",
+      "error-discarded:90:accepted",
+      "response-wire:90:accepted",
+      "response-decoded:90:accepted",
+      "error-discarded:90:accepted",
+      "response-wire:90:accepted",
+      "response-decoded:90:accepted",
+      "error-discarded:90:accepted",
+      "response-wire:90:accepted",
+      "response-decoded:90:accepted",
+      "error-discarded:90:accepted",
+      "response-wire:90:accepted",
+      "response-decoded:90:accepted",
+      "error-discarded:90:accepted",
+      "response-wire:90:accepted",
+      "response-decoded:90:accepted",
+      "error-discarded:90:accepted",
+      "response-wire:90:accepted",
+      "response-decoded:90:accepted",
+      "error-discarded:90:accepted"
+    ],
+    "redactionTrace": [
+      "scan:render:clean",
+      "scan:logs:clean",
+      "scan:observer:clean",
+      "scan:metric-tags:clean",
+      "scan:spans:clean"
+    ],
+    "fixtureTrace": [
+      "fixture:attempt:1:accepted",
+      "fixture:attempt:1:idempotency:idem_attempts_10",
+      "fixture:attempt:1:response-bytes:90",
+      "fixture:attempt:2:accepted",
+      "fixture:attempt:2:idempotency:idem_attempts_10",
+      "fixture:attempt:2:response-bytes:90",
+      "fixture:attempt:3:accepted",
+      "fixture:attempt:3:idempotency:idem_attempts_10",
+      "fixture:attempt:3:response-bytes:90",
+      "fixture:attempt:4:accepted",
+      "fixture:attempt:4:idempotency:idem_attempts_10",
+      "fixture:attempt:4:response-bytes:90",
+      "fixture:attempt:5:accepted",
+      "fixture:attempt:5:idempotency:idem_attempts_10",
+      "fixture:attempt:5:response-bytes:90",
+      "fixture:attempt:6:accepted",
+      "fixture:attempt:6:idempotency:idem_attempts_10",
+      "fixture:attempt:6:response-bytes:90",
+      "fixture:attempt:7:accepted",
+      "fixture:attempt:7:idempotency:idem_attempts_10",
+      "fixture:attempt:7:response-bytes:90",
+      "fixture:attempt:8:accepted",
+      "fixture:attempt:8:idempotency:idem_attempts_10",
+      "fixture:attempt:8:response-bytes:90",
+      "fixture:attempt:9:accepted",
+      "fixture:attempt:9:idempotency:idem_attempts_10",
+      "fixture:attempt:9:response-bytes:90",
+      "fixture:attempt:10:accepted",
+      "fixture:attempt:10:idempotency:idem_attempts_10",
+      "fixture:attempt:10:response-bytes:90"
+    ],
+    "result": null,
+    "observerCallbackTrace": [],
+    "primarySurface": "sendOperation",
+    "completionRoute": "OPERATION_EXECUTION",
+    "runtimeDiagnostics": {
+      "inFlightOperations": 0,
+      "bufferedBytes": 0,
+      "concurrencyOverloadRejections": 0,
+      "requestByteOverloadRejections": 0,
+      "responseByteOverloadRejections": 0,
+      "responseHeaderLimitFailures": 0,
+      "executorOverloadRejections": 0,
+      "schedulerOverloadRejections": 0,
+      "responseCloseFailures": 0,
+      "droppedObserverEvents": 0,
+      "observerFailures": 0,
+      "closed": false
+    },
+    "outcomeEvidence": {
+      "operationId": "op-0001",
+      "primaryKind": "structured-error",
+      "nativeCancelled": false,
+      "settlements": 1,
+      "code": "SERVER_FAILURE",
+      "delivery": "POSSIBLY_SENT",
+      "attemptCount": 10,
+      "httpStatus": 500,
+      "idempotencyKey": "idem_attempts_10",
+      "noGhostWork": true,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "observerEmissionTrace": [
+      "operation.start|operationId=op-0001",
+      "attempt.start|operationId=op-0001|attempt=1",
+      "attempt.end|operationId=op-0001|attempt=1|durationMs=0|outcome=server-failure|code=SERVER_FAILURE|failureReason=NONE|delivery=POSSIBLY_SENT|statusClass=5xx",
+      "retry.delay|operationId=op-0001|attempt=2|delayMs=0",
+      "attempt.start|operationId=op-0001|attempt=2",
+      "attempt.end|operationId=op-0001|attempt=2|durationMs=0|outcome=server-failure|code=SERVER_FAILURE|failureReason=NONE|delivery=POSSIBLY_SENT|statusClass=5xx",
+      "retry.delay|operationId=op-0001|attempt=3|delayMs=0",
+      "attempt.start|operationId=op-0001|attempt=3",
+      "attempt.end|operationId=op-0001|attempt=3|durationMs=0|outcome=server-failure|code=SERVER_FAILURE|failureReason=NONE|delivery=POSSIBLY_SENT|statusClass=5xx",
+      "retry.delay|operationId=op-0001|attempt=4|delayMs=0",
+      "attempt.start|operationId=op-0001|attempt=4",
+      "attempt.end|operationId=op-0001|attempt=4|durationMs=0|outcome=server-failure|code=SERVER_FAILURE|failureReason=NONE|delivery=POSSIBLY_SENT|statusClass=5xx",
+      "retry.delay|operationId=op-0001|attempt=5|delayMs=0",
+      "attempt.start|operationId=op-0001|attempt=5",
+      "attempt.end|operationId=op-0001|attempt=5|durationMs=0|outcome=server-failure|code=SERVER_FAILURE|failureReason=NONE|delivery=POSSIBLY_SENT|statusClass=5xx",
+      "retry.delay|operationId=op-0001|attempt=6|delayMs=0",
+      "attempt.start|operationId=op-0001|attempt=6",
+      "attempt.end|operationId=op-0001|attempt=6|durationMs=0|outcome=server-failure|code=SERVER_FAILURE|failureReason=NONE|delivery=POSSIBLY_SENT|statusClass=5xx",
+      "retry.delay|operationId=op-0001|attempt=7|delayMs=0",
+      "attempt.start|operationId=op-0001|attempt=7",
+      "attempt.end|operationId=op-0001|attempt=7|durationMs=0|outcome=server-failure|code=SERVER_FAILURE|failureReason=NONE|delivery=POSSIBLY_SENT|statusClass=5xx",
+      "retry.delay|operationId=op-0001|attempt=8|delayMs=0",
+      "attempt.start|operationId=op-0001|attempt=8",
+      "attempt.end|operationId=op-0001|attempt=8|durationMs=0|outcome=server-failure|code=SERVER_FAILURE|failureReason=NONE|delivery=POSSIBLY_SENT|statusClass=5xx",
+      "retry.delay|operationId=op-0001|attempt=9|delayMs=0",
+      "attempt.start|operationId=op-0001|attempt=9",
+      "attempt.end|operationId=op-0001|attempt=9|durationMs=0|outcome=server-failure|code=SERVER_FAILURE|failureReason=NONE|delivery=POSSIBLY_SENT|statusClass=5xx",
+      "retry.delay|operationId=op-0001|attempt=10|delayMs=0",
+      "attempt.start|operationId=op-0001|attempt=10",
+      "attempt.end|operationId=op-0001|attempt=10|durationMs=0|outcome=server-failure|code=SERVER_FAILURE|failureReason=NONE|delivery=POSSIBLY_SENT|statusClass=5xx",
+      "operation.end|operationId=op-0001|durationMs=0|outcome=failed|code=SERVER_FAILURE|failureReason=NONE|delivery=POSSIBLY_SENT|attempts=10"
+    ]
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "caseId": "configuration-legacy-token-fallback",
+  "category": "configuration",
+  "description": "REPOST_TOKEN is used only when no higher-precedence credential is present.",
+  "input": {
+    "profile": "empty",
+    "env": {
+      "REPOST_TOKEN": "legacy-key"
+    }
+  },
+  "options": {
+    "idempotencyKey": "idem_legacy"
+  },
+  "script": [
+    {
+      "actor": "fixture",
+      "action": "respond",
+      "attempt": 1,
+      "status": 202,
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": {
+        "asset": "validIdentity"
+      }
+    },
+    {
+      "actor": "runner",
+      "action": "drainRuntimeDiagnostics"
+    }
+  ],
+  "expected": {
+    "configurationTrace": [
+      "credential:REPOST_TOKEN",
+      "base-url:default",
+      "endpoint-path:/v1/messages",
+      "redirects:false",
+      "snapshot:1"
+    ],
+    "attemptTrace": [
+      "attempt:1:start@0",
+      "attempt:1:commit@0",
+      "attempt:1:response:202@0",
+      "attempt:1:end:accepted@0"
+    ],
+    "commitTrace": [
+      "attempt:1:NOT_SENT@0",
+      "attempt:1:POSSIBLY_SENT@0",
+      "operation:POSSIBLY_SENT@0"
+    ],
+    "scheduleTrace": [],
+    "sideEffectTrace": [
+      "permit.acquire",
+      "configuration.snapshot",
+      "credentials.snapshot",
+      "defaults.snapshot",
+      "idempotency.generate:0",
+      "serialize:1",
+      "network:1",
+      "permit.release"
+    ],
+    "errorTrace": [],
+    "error": null,
+    "delivery": "ACCEPTED",
+    "byteTrace": [
+      "response-wire:104:accepted",
+      "response-decoded:104:accepted"
+    ],
+    "redactionTrace": [],
+    "fixtureTrace": [
+      "fixture:attempt:1:accepted",
+      "fixture:attempt:1:idempotency:idem_legacy",
+      "fixture:attempt:1:response-bytes:104"
+    ],
+    "result": {
+      "id": "msg_1",
+      "type": "contract.sent",
+      "customerId": "cus_contract",
+      "timestamp": "2026-01-01T00:00:00.000Z"
+    },
+    "legacyBody": null,
+    "outcomeEvidence": {
+      "operationId": "op-0001",
+      "primaryKind": "success",
+      "nativeCancelled": false,
+      "settlements": 1,
+      "code": "OK",
+      "delivery": "ACCEPTED",
+      "attemptCount": 1,
+      "httpStatus": 202,
+      "idempotencyKey": "idem_legacy",
+      "noGhostWork": true,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "primarySurface": "sendOperation",
+    "runtimeDiagnostics": {
+      "inFlightOperations": 0,
+      "bufferedBytes": 0,
+      "concurrencyOverloadRejections": 0,
+      "requestByteOverloadRejections": 0,
+      "responseByteOverloadRejections": 0,
+      "responseHeaderLimitFailures": 0,
+      "executorOverloadRejections": 0,
+      "schedulerOverloadRejections": 0,
+      "responseCloseFailures": 0,
+      "droppedObserverEvents": 0,
+      "observerFailures": 0,
+      "closed": false
+    },
+    "completionRoute": "OPERATION_EXECUTION",
+    "observerCallbackTrace": [],
+    "observerEmissionTrace": [
+      "operation.start|operationId=op-0001",
+      "attempt.start|operationId=op-0001|attempt=1",
+      "attempt.end|operationId=op-0001|attempt=1|durationMs=0|outcome=accepted|code=NONE|failureReason=NONE|delivery=ACCEPTED|statusClass=2xx",
+      "operation.end|operationId=op-0001|durationMs=0|outcome=accepted|code=NONE|failureReason=NONE|delivery=ACCEPTED|attempts=1"
+    ]
+  }
+}

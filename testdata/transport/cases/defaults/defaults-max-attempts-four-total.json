@@ -1,0 +1,248 @@
+{
+  "caseId": "defaults-max-attempts-four-total",
+  "category": "defaults",
+  "description": "The default attempt budget is four total attempts, including the first.",
+  "input": {
+    "profile": "valid",
+    "entropy": [
+      0,
+      0,
+      0
+    ]
+  },
+  "options": {
+    "idempotencyKey": "idem_four"
+  },
+  "script": [
+    {
+      "actor": "fixture",
+      "action": "respond",
+      "attempt": 1,
+      "status": 500,
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": {
+        "asset": "remoteError"
+      }
+    },
+    {
+      "actor": "fixture",
+      "action": "respond",
+      "attempt": 2,
+      "status": 500,
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": {
+        "asset": "remoteError"
+      }
+    },
+    {
+      "actor": "fixture",
+      "action": "respond",
+      "attempt": 3,
+      "status": 500,
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": {
+        "asset": "remoteError"
+      }
+    },
+    {
+      "actor": "fixture",
+      "action": "respond",
+      "attempt": 4,
+      "status": 500,
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": {
+        "asset": "remoteError"
+      }
+    },
+    {
+      "actor": "runner",
+      "action": "drainRuntimeDiagnostics"
+    }
+  ],
+  "expected": {
+    "configurationTrace": [
+      "credential:REPOST_SEND_API_KEY",
+      "base-url:default",
+      "endpoint-path:/v1/messages",
+      "redirects:false",
+      "snapshot:1"
+    ],
+    "attemptTrace": [
+      "attempt:1:start@0",
+      "attempt:1:commit@0",
+      "attempt:1:response:500@0",
+      "attempt:1:end:server-failure@0",
+      "attempt:2:start@0",
+      "attempt:2:commit@0",
+      "attempt:2:response:500@0",
+      "attempt:2:end:server-failure@0",
+      "attempt:3:start@0",
+      "attempt:3:commit@0",
+      "attempt:3:response:500@0",
+      "attempt:3:end:server-failure@0",
+      "attempt:4:start@0",
+      "attempt:4:commit@0",
+      "attempt:4:response:500@0",
+      "attempt:4:end:server-failure@0"
+    ],
+    "commitTrace": [
+      "attempt:1:NOT_SENT@0",
+      "attempt:1:POSSIBLY_SENT@0",
+      "operation:POSSIBLY_SENT@0",
+      "attempt:2:NOT_SENT@0",
+      "attempt:2:POSSIBLY_SENT@0",
+      "attempt:3:NOT_SENT@0",
+      "attempt:3:POSSIBLY_SENT@0",
+      "attempt:4:NOT_SENT@0",
+      "attempt:4:POSSIBLY_SENT@0"
+    ],
+    "scheduleTrace": [
+      "retry:1:cap=250@0",
+      "retry:1:bound=251@0",
+      "retry:1:entropy=0@0",
+      "retry:1:delay=0@0",
+      "retry:2:cap=500@0",
+      "retry:2:bound=501@0",
+      "retry:2:entropy=0@0",
+      "retry:2:delay=0@0",
+      "retry:3:cap=1000@0",
+      "retry:3:bound=1001@0",
+      "retry:3:entropy=0@0",
+      "retry:3:delay=0@0"
+    ],
+    "sideEffectTrace": [
+      "permit.acquire",
+      "configuration.snapshot",
+      "credentials.snapshot",
+      "defaults.snapshot",
+      "idempotency.generate:0",
+      "serialize:1",
+      "network:4",
+      "permit.release"
+    ],
+    "errorTrace": [
+      "terminal:SERVER_FAILURE:POSSIBLY_SENT"
+    ],
+    "error": {
+      "code": "SERVER_FAILURE",
+      "delivery": "POSSIBLY_SENT",
+      "attemptCount": 4,
+      "httpStatus": 500,
+      "retryable": true,
+      "compressedBytes": 90,
+      "decompressedBytes": 90,
+      "truncated": false,
+      "idempotencyKey": "idem_four",
+      "message": "Server failed to process the request",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": "op-0001",
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [],
+      "configurationIssues": [],
+      "issueCount": 0,
+      "issuesTruncated": false,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "delivery": "POSSIBLY_SENT",
+    "byteTrace": [
+      "response-wire:90:accepted",
+      "response-decoded:90:accepted",
+      "error-discarded:90:accepted",
+      "response-wire:90:accepted",
+      "response-decoded:90:accepted",
+      "error-discarded:90:accepted",
+      "response-wire:90:accepted",
+      "response-decoded:90:accepted",
+      "error-discarded:90:accepted",
+      "response-wire:90:accepted",
+      "response-decoded:90:accepted",
+      "error-discarded:90:accepted"
+    ],
+    "redactionTrace": [
+      "scan:render:clean",
+      "scan:logs:clean",
+      "scan:observer:clean",
+      "scan:metric-tags:clean",
+      "scan:spans:clean"
+    ],
+    "fixtureTrace": [
+      "fixture:attempt:1:accepted",
+      "fixture:attempt:1:idempotency:idem_four",
+      "fixture:attempt:1:response-bytes:90",
+      "fixture:attempt:2:accepted",
+      "fixture:attempt:2:idempotency:idem_four",
+      "fixture:attempt:2:response-bytes:90",
+      "fixture:attempt:3:accepted",
+      "fixture:attempt:3:idempotency:idem_four",
+      "fixture:attempt:3:response-bytes:90",
+      "fixture:attempt:4:accepted",
+      "fixture:attempt:4:idempotency:idem_four",
+      "fixture:attempt:4:response-bytes:90"
+    ],
+    "result": null,
+    "legacyBody": {
+      "code": "SERVER_FAILURE",
+      "message": "Server failed to process the request",
+      "truncated": false
+    },
+    "outcomeEvidence": {
+      "operationId": "op-0001",
+      "primaryKind": "structured-error",
+      "nativeCancelled": false,
+      "settlements": 1,
+      "code": "SERVER_FAILURE",
+      "delivery": "POSSIBLY_SENT",
+      "attemptCount": 4,
+      "httpStatus": 500,
+      "idempotencyKey": "idem_four",
+      "noGhostWork": true,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "primarySurface": "sendOperation",
+    "runtimeDiagnostics": {
+      "inFlightOperations": 0,
+      "bufferedBytes": 0,
+      "concurrencyOverloadRejections": 0,
+      "requestByteOverloadRejections": 0,
+      "responseByteOverloadRejections": 0,
+      "responseHeaderLimitFailures": 0,
+      "executorOverloadRejections": 0,
+      "schedulerOverloadRejections": 0,
+      "responseCloseFailures": 0,
+      "droppedObserverEvents": 0,
+      "observerFailures": 0,
+      "closed": false
+    },
+    "completionRoute": "OPERATION_EXECUTION",
+    "observerCallbackTrace": [],
+    "observerEmissionTrace": [
+      "operation.start|operationId=op-0001",
+      "attempt.start|operationId=op-0001|attempt=1",
+      "attempt.end|operationId=op-0001|attempt=1|durationMs=0|outcome=server-failure|code=SERVER_FAILURE|failureReason=NONE|delivery=POSSIBLY_SENT|statusClass=5xx",
+      "retry.delay|operationId=op-0001|attempt=2|delayMs=0",
+      "attempt.start|operationId=op-0001|attempt=2",
+      "attempt.end|operationId=op-0001|attempt=2|durationMs=0|outcome=server-failure|code=SERVER_FAILURE|failureReason=NONE|delivery=POSSIBLY_SENT|statusClass=5xx",
+      "retry.delay|operationId=op-0001|attempt=3|delayMs=0",
+      "attempt.start|operationId=op-0001|attempt=3",
+      "attempt.end|operationId=op-0001|attempt=3|durationMs=0|outcome=server-failure|code=SERVER_FAILURE|failureReason=NONE|delivery=POSSIBLY_SENT|statusClass=5xx",
+      "retry.delay|operationId=op-0001|attempt=4|delayMs=0",
+      "attempt.start|operationId=op-0001|attempt=4",
+      "attempt.end|operationId=op-0001|attempt=4|durationMs=0|outcome=server-failure|code=SERVER_FAILURE|failureReason=NONE|delivery=POSSIBLY_SENT|statusClass=5xx",
+      "operation.end|operationId=op-0001|durationMs=0|outcome=failed|code=SERVER_FAILURE|failureReason=NONE|delivery=POSSIBLY_SENT|attempts=4"
+    ]
+  }
+}

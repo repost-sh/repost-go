@@ -1,0 +1,6 @@
+{
+  "source": "../jvm/certification/transport/v2.json",
+  "sha256": "7673281391f59fa9f813cf24b87f690983fa59468f5601d2973d2c2b39e643bb",
+  "caseCount": 401,
+  "scenarioCount": 14
+}

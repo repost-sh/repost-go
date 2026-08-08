@@ -1,0 +1,179 @@
+{
+  "caseId": "response-valid-looking-identity-mismatch-exhausted",
+  "category": "response",
+  "description": "Valid-looking response identity mismatches exhaust retry budget as RESPONSE_PROTOCOL/POSSIBLY_SENT.",
+  "input": {
+    "profile": "valid",
+    "entropy": [
+      0
+    ]
+  },
+  "options": {
+    "maxAttempts": 2,
+    "idempotencyKey": "idem_identity_mismatch_exhausted"
+  },
+  "script": [
+    {
+      "actor": "fixture",
+      "action": "respond",
+      "attempt": 1,
+      "status": 200,
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": {
+        "kind": "base64",
+        "data": "eyJpZCI6Im1zZ18xIiwidHlwZSI6ImNvbnRyYWN0Lm90aGVyIiwiY3VzdG9tZXJJZCI6ImN1c19jb250cmFjdCIsInRpbWVzdGFtcCI6IjIwMjYtMDEtMDFUMDA6MDA6MDAuMDAwWiJ9"
+      }
+    },
+    {
+      "actor": "fixture",
+      "action": "respond",
+      "attempt": 2,
+      "status": 200,
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": {
+        "kind": "base64",
+        "data": "eyJpZCI6Im1zZ18xIiwidHlwZSI6ImNvbnRyYWN0LnNlbnQiLCJjdXN0b21lcklkIjoiY3VzX290aGVyIiwidGltZXN0YW1wIjoiMjAyNi0wMS0wMVQwMDowMDowMC4wMDBaIn0="
+      }
+    },
+    {
+      "actor": "runner",
+      "action": "drainRuntimeDiagnostics"
+    }
+  ],
+  "expected": {
+    "configurationTrace": [
+      "credential:REPOST_SEND_API_KEY",
+      "base-url:default",
+      "endpoint-path:/v1/messages",
+      "redirects:false",
+      "snapshot:1"
+    ],
+    "attemptTrace": [
+      "attempt:1:start@0",
+      "attempt:1:commit@0",
+      "attempt:1:response:200@0",
+      "attempt:1:end:response-protocol@0",
+      "attempt:2:start@0",
+      "attempt:2:commit@0",
+      "attempt:2:response:200@0",
+      "attempt:2:end:response-protocol@0"
+    ],
+    "commitTrace": [
+      "attempt:1:NOT_SENT@0",
+      "attempt:1:POSSIBLY_SENT@0",
+      "operation:POSSIBLY_SENT@0",
+      "attempt:2:NOT_SENT@0",
+      "attempt:2:POSSIBLY_SENT@0"
+    ],
+    "scheduleTrace": [
+      "retry:1:cap=250@0",
+      "retry:1:bound=251@0",
+      "retry:1:entropy=0@0",
+      "retry:1:delay=0@0"
+    ],
+    "sideEffectTrace": [
+      "permit.acquire",
+      "configuration.snapshot",
+      "credentials.snapshot",
+      "defaults.snapshot",
+      "idempotency.generate:0",
+      "serialize:1",
+      "network:2",
+      "permit.release"
+    ],
+    "errorTrace": [
+      "terminal:RESPONSE_PROTOCOL:POSSIBLY_SENT"
+    ],
+    "error": {
+      "code": "RESPONSE_PROTOCOL",
+      "delivery": "POSSIBLY_SENT",
+      "attemptCount": 2,
+      "httpStatus": 200,
+      "retryable": true,
+      "compressedBytes": 101,
+      "decompressedBytes": 101,
+      "truncated": false,
+      "idempotencyKey": "idem_identity_mismatch_exhausted",
+      "message": "Response protocol is invalid",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": "op-0001",
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [],
+      "configurationIssues": [],
+      "issueCount": 0,
+      "issuesTruncated": false,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "legacyBody": {
+      "code": "RESPONSE_PROTOCOL",
+      "message": "Response protocol is invalid",
+      "truncated": false
+    },
+    "delivery": "POSSIBLY_SENT",
+    "byteTrace": [
+      "response-wire:105:accepted",
+      "response-decoded:105:accepted",
+      "response-wire:101:accepted",
+      "response-decoded:101:accepted"
+    ],
+    "redactionTrace": [],
+    "fixtureTrace": [
+      "fixture:attempt:1:accepted",
+      "fixture:attempt:1:idempotency:idem_identity_mismatch_exhausted",
+      "fixture:attempt:1:response-bytes:105",
+      "fixture:attempt:2:accepted",
+      "fixture:attempt:2:idempotency:idem_identity_mismatch_exhausted",
+      "fixture:attempt:2:response-bytes:101"
+    ],
+    "result": null,
+    "outcomeEvidence": {
+      "operationId": "op-0001",
+      "primaryKind": "structured-error",
+      "nativeCancelled": false,
+      "settlements": 1,
+      "code": "RESPONSE_PROTOCOL",
+      "delivery": "POSSIBLY_SENT",
+      "attemptCount": 2,
+      "httpStatus": 200,
+      "idempotencyKey": "idem_identity_mismatch_exhausted",
+      "noGhostWork": true,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "primarySurface": "sendOperation",
+    "runtimeDiagnostics": {
+      "inFlightOperations": 0,
+      "bufferedBytes": 0,
+      "concurrencyOverloadRejections": 0,
+      "requestByteOverloadRejections": 0,
+      "responseByteOverloadRejections": 0,
+      "responseHeaderLimitFailures": 0,
+      "executorOverloadRejections": 0,
+      "schedulerOverloadRejections": 0,
+      "responseCloseFailures": 0,
+      "droppedObserverEvents": 0,
+      "observerFailures": 0,
+      "closed": false
+    },
+    "completionRoute": "OPERATION_EXECUTION",
+    "observerCallbackTrace": [],
+    "observerEmissionTrace": [
+      "operation.start|operationId=op-0001",
+      "attempt.start|operationId=op-0001|attempt=1",
+      "attempt.end|operationId=op-0001|attempt=1|durationMs=0|outcome=response-protocol|code=RESPONSE_PROTOCOL|failureReason=NONE|delivery=POSSIBLY_SENT|statusClass=2xx",
+      "retry.delay|operationId=op-0001|attempt=2|delayMs=0",
+      "attempt.start|operationId=op-0001|attempt=2",
+      "attempt.end|operationId=op-0001|attempt=2|durationMs=0|outcome=response-protocol|code=RESPONSE_PROTOCOL|failureReason=NONE|delivery=POSSIBLY_SENT|statusClass=2xx",
+      "operation.end|operationId=op-0001|durationMs=0|outcome=failed|code=RESPONSE_PROTOCOL|failureReason=NONE|delivery=POSSIBLY_SENT|attempts=2"
+    ]
+  }
+}

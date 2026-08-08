@@ -1,0 +1,163 @@
+{
+  "caseId": "deadline-connect-budget-clamped-not-refreshed",
+  "category": "deadline",
+  "description": "A second connect timeout is clamped to the original operation budget rather than refreshed.",
+  "input": {
+    "profile": "valid",
+    "entropy": [
+      0
+    ]
+  },
+  "options": {
+    "connectTimeoutMs": 10000,
+    "operationTimeoutMs": 15000,
+    "maxAttempts": 2,
+    "idempotencyKey": "idem_connect_budget"
+  },
+  "script": [
+    {
+      "actor": "fixture",
+      "action": "hold",
+      "attempt": 1,
+      "phase": "beforeRequestBytes",
+      "barrier": "c1"
+    },
+    {
+      "actor": "runner",
+      "action": "advanceTime",
+      "byMs": 10000
+    },
+    {
+      "actor": "fixture",
+      "action": "hold",
+      "attempt": 2,
+      "phase": "beforeRequestBytes",
+      "barrier": "c2"
+    },
+    {
+      "actor": "runner",
+      "action": "advanceTime",
+      "byMs": 5000
+    },
+    {
+      "actor": "runner",
+      "action": "drainRuntimeDiagnostics"
+    }
+  ],
+  "expected": {
+    "configurationTrace": [
+      "credential:REPOST_SEND_API_KEY",
+      "base-url:default",
+      "endpoint-path:/v1/messages",
+      "redirects:false",
+      "snapshot:1"
+    ],
+    "attemptTrace": [
+      "attempt:1:start@0",
+      "attempt:1:end:connect-timeout@10000",
+      "attempt:2:start@10000",
+      "attempt:2:end:operation-deadline@15000"
+    ],
+    "commitTrace": [
+      "attempt:1:NOT_SENT@0",
+      "attempt:2:NOT_SENT@10000"
+    ],
+    "scheduleTrace": [
+      "retry:1:cap=250@10000",
+      "retry:1:bound=251@10000",
+      "retry:1:entropy=0@10000",
+      "retry:1:delay=0@10000"
+    ],
+    "sideEffectTrace": [
+      "permit.acquire",
+      "configuration.snapshot",
+      "credentials.snapshot",
+      "defaults.snapshot",
+      "idempotency.generate:0",
+      "serialize:1",
+      "network:2",
+      "permit.release"
+    ],
+    "errorTrace": [
+      "terminal:OPERATION_DEADLINE:NOT_SENT"
+    ],
+    "error": {
+      "code": "OPERATION_DEADLINE",
+      "delivery": "NOT_SENT",
+      "attemptCount": 2,
+      "httpStatus": null,
+      "retryable": false,
+      "compressedBytes": 0,
+      "decompressedBytes": 0,
+      "truncated": false,
+      "idempotencyKey": "idem_connect_budget",
+      "message": "Operation deadline exceeded",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": "op-0001",
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [],
+      "configurationIssues": [],
+      "issueCount": 0,
+      "issuesTruncated": false,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "delivery": "NOT_SENT",
+    "byteTrace": [],
+    "redactionTrace": [],
+    "fixtureTrace": [
+      "fixture:attempt:1:accepted",
+      "fixture:attempt:2:accepted"
+    ],
+    "result": null,
+    "legacyBody": {
+      "code": "OPERATION_DEADLINE",
+      "message": "Operation deadline exceeded",
+      "truncated": false
+    },
+    "outcomeEvidence": {
+      "operationId": "op-0001",
+      "primaryKind": "structured-error",
+      "nativeCancelled": false,
+      "settlements": 1,
+      "code": "OPERATION_DEADLINE",
+      "delivery": "NOT_SENT",
+      "attemptCount": 2,
+      "httpStatus": null,
+      "idempotencyKey": "idem_connect_budget",
+      "noGhostWork": true,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "primarySurface": "sendOperation",
+    "runtimeDiagnostics": {
+      "inFlightOperations": 0,
+      "bufferedBytes": 0,
+      "concurrencyOverloadRejections": 0,
+      "requestByteOverloadRejections": 0,
+      "responseByteOverloadRejections": 0,
+      "responseHeaderLimitFailures": 0,
+      "executorOverloadRejections": 0,
+      "schedulerOverloadRejections": 0,
+      "responseCloseFailures": 0,
+      "droppedObserverEvents": 0,
+      "observerFailures": 0,
+      "closed": false
+    },
+    "completionRoute": "TERMINAL_DISPATCHER",
+    "observerCallbackTrace": [],
+    "observerEmissionTrace": [
+      "operation.start|operationId=op-0001",
+      "attempt.start|operationId=op-0001|attempt=1",
+      "attempt.end|operationId=op-0001|attempt=1|durationMs=10000|outcome=connect-timeout|code=CONNECT|failureReason=UNKNOWN|delivery=NOT_SENT|statusClass=none",
+      "retry.delay|operationId=op-0001|attempt=2|delayMs=0",
+      "attempt.start|operationId=op-0001|attempt=2",
+      "attempt.end|operationId=op-0001|attempt=2|durationMs=5000|outcome=operation-deadline|code=OPERATION_DEADLINE|failureReason=NONE|delivery=NOT_SENT|statusClass=none",
+      "operation.end|operationId=op-0001|durationMs=15000|outcome=failed|code=OPERATION_DEADLINE|failureReason=NONE|delivery=NOT_SENT|attempts=2"
+    ]
+  }
+}

@@ -1,0 +1,145 @@
+{
+  "caseId": "error-safety-corrupt-gzip-five-hundred-stops-retry",
+  "category": "error-safety",
+  "description": "Known non-2xx status classification and delivery take precedence over unsafe or resource-abusive error-body decoding.",
+  "input": {
+    "profile": "valid"
+  },
+  "options": {
+    "maxAttempts": 4,
+    "idempotencyKey": "idem_error_safety_corrupt_gzip_five_hundred_stops_retry"
+  },
+  "script": [
+    {
+      "actor": "fixture",
+      "action": "respond",
+      "attempt": 1,
+      "status": 500,
+      "headers": {
+        "content-type": "application/json",
+        "content-encoding": "gzip"
+      },
+      "body": {
+        "asset": "corruptGzipTrailer"
+      }
+    },
+    {
+      "actor": "runner",
+      "action": "drainRuntimeDiagnostics"
+    }
+  ],
+  "expected": {
+    "configurationTrace": [
+      "credential:REPOST_SEND_API_KEY",
+      "base-url:default",
+      "endpoint-path:/v1/messages",
+      "redirects:false",
+      "snapshot:1"
+    ],
+    "attemptTrace": [
+      "attempt:1:start@0",
+      "attempt:1:commit@0",
+      "attempt:1:response:500@0",
+      "attempt:1:end:server-failure@0"
+    ],
+    "commitTrace": [
+      "attempt:1:NOT_SENT@0",
+      "attempt:1:POSSIBLY_SENT@0",
+      "operation:POSSIBLY_SENT@0"
+    ],
+    "scheduleTrace": [],
+    "sideEffectTrace": [
+      "permit.acquire",
+      "configuration.snapshot",
+      "credentials.snapshot",
+      "defaults.snapshot",
+      "idempotency.generate:0",
+      "serialize:1",
+      "network:1",
+      "response.cancel",
+      "permit.release"
+    ],
+    "errorTrace": [
+      "terminal:SERVER_FAILURE:POSSIBLY_SENT"
+    ],
+    "error": {
+      "code": "SERVER_FAILURE",
+      "delivery": "POSSIBLY_SENT",
+      "attemptCount": 1,
+      "httpStatus": 500,
+      "retryable": false,
+      "compressedBytes": 108,
+      "decompressedBytes": 0,
+      "truncated": false,
+      "idempotencyKey": "idem_error_safety_corrupt_gzip_five_hundred_stops_retry",
+      "message": "Server failed to process the request",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": "op-0001",
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null,
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [],
+      "configurationIssues": [],
+      "issueCount": 0,
+      "issuesTruncated": false
+    },
+    "legacyBody": {
+      "code": "SERVER_FAILURE",
+      "message": "Server failed to process the request",
+      "truncated": false
+    },
+    "delivery": "POSSIBLY_SENT",
+    "byteTrace": [
+      "response-wire:108:accepted",
+      "response-decoded:0:rejected"
+    ],
+    "redactionTrace": [],
+    "fixtureTrace": [
+      "fixture:attempt:1:accepted",
+      "fixture:attempt:1:idempotency:idem_error_safety_corrupt_gzip_five_hundred_stops_retry",
+      "fixture:attempt:1:response-cancelled:108"
+    ],
+    "result": null,
+    "observerCallbackTrace": [],
+    "primarySurface": "sendOperation",
+    "completionRoute": "OPERATION_EXECUTION",
+    "runtimeDiagnostics": {
+      "inFlightOperations": 0,
+      "bufferedBytes": 0,
+      "concurrencyOverloadRejections": 0,
+      "requestByteOverloadRejections": 0,
+      "responseByteOverloadRejections": 0,
+      "responseHeaderLimitFailures": 0,
+      "executorOverloadRejections": 0,
+      "schedulerOverloadRejections": 0,
+      "responseCloseFailures": 0,
+      "droppedObserverEvents": 0,
+      "observerFailures": 0,
+      "closed": false
+    },
+    "outcomeEvidence": {
+      "operationId": "op-0001",
+      "primaryKind": "structured-error",
+      "nativeCancelled": false,
+      "settlements": 1,
+      "code": "SERVER_FAILURE",
+      "delivery": "POSSIBLY_SENT",
+      "attemptCount": 1,
+      "httpStatus": 500,
+      "idempotencyKey": "idem_error_safety_corrupt_gzip_five_hundred_stops_retry",
+      "noGhostWork": true,
+      "failureReason": null,
+      "remediationKey": null,
+      "causeCategory": null
+    },
+    "observerEmissionTrace": [
+      "operation.start|operationId=op-0001",
+      "attempt.start|operationId=op-0001|attempt=1",
+      "attempt.end|operationId=op-0001|attempt=1|durationMs=0|outcome=server-failure|code=SERVER_FAILURE|failureReason=NONE|delivery=POSSIBLY_SENT|statusClass=5xx",
+      "operation.end|operationId=op-0001|durationMs=0|outcome=failed|code=SERVER_FAILURE|failureReason=NONE|delivery=POSSIBLY_SENT|attempts=1"
+    ]
+  }
+}

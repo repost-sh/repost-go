@@ -1,0 +1,152 @@
+{
+  "caseId": "network-reset-before-request-bytes",
+  "category": "failure-mapping",
+  "description": "Execute enterprise network capability reset-before-request-bytes through the actual production raw-streaming transport and prove exact fixture state plus one-shot publication bounds.",
+  "input": {
+    "profile": "valid"
+  },
+  "options": {
+    "maxAttempts": 1,
+    "idempotencyKey": "idem_map_io_before",
+    "baseUrl": "$networkFixtureUrl"
+  },
+  "script": [
+    {
+      "actor": "fixture",
+      "action": "failConnection",
+      "attempt": 1,
+      "phase": "beforeRequestBytes",
+      "kind": "io",
+      "failureReason": "CONNECTION_RESET"
+    },
+    {
+      "actor": "runner",
+      "action": "proveNetworkCapability",
+      "capability": "reset-before-request-bytes",
+      "endpointField": "resetBeforeRequestBaseUrl",
+      "setup": [
+        "reset"
+      ],
+      "operationOutcomes": [
+        "op1:primary=structured-error:code=IO:delivery=NOT_SENT:attempts=1:publications=0"
+      ],
+      "operationCount": 1,
+      "coreAttemptCount": 1,
+      "wireBodyPublications": 0,
+      "expectedState": "resetBeforeRequest.resets=1;resetBeforeRequest.requestBytes=0"
+    },
+    {
+      "actor": "runner",
+      "action": "drainRuntimeDiagnostics"
+    }
+  ],
+  "expected": {
+    "configurationTrace": [
+      "credential:REPOST_SEND_API_KEY",
+      "base-url:baseUrl",
+      "endpoint-path:/v1/messages",
+      "redirects:false",
+      "snapshot:1"
+    ],
+    "attemptTrace": [
+      "attempt:1:start@0",
+      "attempt:1:end:io@0"
+    ],
+    "commitTrace": [
+      "attempt:1:NOT_SENT@0"
+    ],
+    "scheduleTrace": [],
+    "sideEffectTrace": [
+      "permit.acquire",
+      "configuration.snapshot",
+      "credentials.snapshot",
+      "defaults.snapshot",
+      "idempotency.generate:0",
+      "serialize:1",
+      "network:1",
+      "permit.release"
+    ],
+    "errorTrace": [
+      "terminal:IO:NOT_SENT"
+    ],
+    "error": {
+      "code": "IO",
+      "delivery": "NOT_SENT",
+      "attemptCount": 1,
+      "httpStatus": null,
+      "retryable": true,
+      "compressedBytes": 0,
+      "decompressedBytes": 0,
+      "truncated": false,
+      "idempotencyKey": "idem_map_io_before",
+      "message": "Transport I/O failed",
+      "responseHeaderFields": 0,
+      "responseHeaderBytes": 0,
+      "operationId": "op-0001",
+      "closeFailureCount": 0,
+      "closeFailureCategories": [],
+      "validationIssues": [],
+      "configurationIssues": [],
+      "issueCount": 0,
+      "issuesTruncated": false,
+      "failureReason": "CONNECTION_RESET",
+      "remediationKey": "network.connection.reset",
+      "causeCategory": "HTTP_RUNTIME"
+    },
+    "delivery": "NOT_SENT",
+    "byteTrace": [],
+    "redactionTrace": [],
+    "fixtureTrace": [
+      "fixture:attempt:1:failure:io",
+      "fixture:network:reset-before-request-bytes:pass",
+      "fixture:network:reset-before-request-bytes:setup:reset",
+      "fixture:network:reset-before-request-bytes:outcomes:op1:primary=structured-error:code=IO:delivery=NOT_SENT:attempts=1:publications=0",
+      "fixture:network:reset-before-request-bytes:operations:1:core-attempts:1:wire-body-publications:0:state:resetBeforeRequest.resets=1;resetBeforeRequest.requestBytes=0"
+    ],
+    "result": null,
+    "legacyBody": {
+      "code": "IO",
+      "message": "Transport I/O failed",
+      "truncated": false
+    },
+    "outcomeEvidence": {
+      "operationId": "op-0001",
+      "primaryKind": "structured-error",
+      "nativeCancelled": false,
+      "settlements": 1,
+      "code": "IO",
+      "delivery": "NOT_SENT",
+      "attemptCount": 1,
+      "httpStatus": null,
+      "idempotencyKey": "idem_map_io_before",
+      "noGhostWork": true,
+      "failureReason": "CONNECTION_RESET",
+      "remediationKey": "network.connection.reset",
+      "causeCategory": "HTTP_RUNTIME"
+    },
+    "primarySurface": "sendOperation",
+    "runtimeDiagnostics": {
+      "inFlightOperations": 0,
+      "bufferedBytes": 0,
+      "concurrencyOverloadRejections": 0,
+      "requestByteOverloadRejections": 0,
+      "responseByteOverloadRejections": 0,
+      "responseHeaderLimitFailures": 0,
+      "executorOverloadRejections": 0,
+      "schedulerOverloadRejections": 0,
+      "responseCloseFailures": 0,
+      "droppedObserverEvents": 0,
+      "observerFailures": 0,
+      "closed": false
+    },
+    "completionRoute": "OPERATION_EXECUTION",
+    "observerCallbackTrace": [],
+    "observerEmissionTrace": [
+      "operation.start|operationId=op-0001",
+      "attempt.start|operationId=op-0001|attempt=1",
+      "attempt.end|operationId=op-0001|attempt=1|durationMs=0|outcome=io|code=IO|failureReason=CONNECTION_RESET|delivery=NOT_SENT|statusClass=none",
+      "operation.end|operationId=op-0001|durationMs=0|outcome=failed|code=IO|failureReason=CONNECTION_RESET|delivery=NOT_SENT|attempts=1"
+    ]
+  },
+  "executionMode": "enterprise-network-fixture"
+}
